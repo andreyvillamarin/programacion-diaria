@@ -4,11 +4,17 @@ require_once '../includes/init.php';
 if ($_SESSION['user_rol'] != 1) { die('Acceso Denegado'); }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recorrer todos los campos enviados y guardarlos
+    // Prepara la consulta una sola vez
+    $stmt = $pdo->prepare(
+        "INSERT INTO configuracion (clave, valor) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE valor = VALUES(valor)"
+    );
+
+    // Recorre todos los campos enviados y los inserta o actualiza
     foreach ($_POST as $key => $value) {
-        $stmt = $pdo->prepare("UPDATE configuracion SET valor = ? WHERE clave = ?");
-        $stmt->execute([$value, $key]);
+        $stmt->execute([$key, $value]);
     }
+    
     $message = "Configuración guardada con éxito.";
 }
 
