@@ -57,7 +57,7 @@
                     </div>
                      <div class="form-group">
                         <label for="programming-date">Fecha de Programación</label>
-                        <input type="date" id="programming-date" name="fecha_programacion" readonly>
+                        <input type="date" id="programming-date" name="fecha_programacion">
                     </div>
                 </fieldset>
 
