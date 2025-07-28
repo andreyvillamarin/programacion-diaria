@@ -1,6 +1,6 @@
 </div>
-        </main>
-    </div>
-    <script src="<?= APP_URL ?>/assets/js/admin.js"></script>
+    </main>
+</div>
+<script src="../assets/js/admin.js"></script>
 </body>
 </html>

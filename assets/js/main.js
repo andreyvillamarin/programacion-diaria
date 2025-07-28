@@ -1,91 +1,138 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('programming-form');
-    if (!form) return; // Salir si no estamos en la página del formulario
+    if (!form) return;
 
     const areaSelect = document.getElementById('area-select');
-    const peopleContainer = document.getElementById('people-container');
     const peopleFieldset = document.getElementById('people-fieldset');
+    const otherAreaFieldset = document.getElementById('other-area-fieldset');
+    const peopleContainer = document.getElementById('people-container');
+    const otherAreaServicesContainer = document.getElementById('other-area-services');
     const dateInput = document.getElementById('programming-date');
     const submitBtn = document.getElementById('submit-btn');
     const formMessages = document.getElementById('form-messages');
 
-    // 1. Asignar fecha de mañana y cargar áreas iniciales
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     dateInput.value = tomorrow.toISOString().split('T')[0];
 
-    fetch(`${App.dataUrl}?action=get_initial_data`)
+    fetch('api/data.php?action=get_initial_data')
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Llenar dropdown de áreas
                 areaSelect.innerHTML = '<option value="">-- Seleccione un área --</option>';
                 data.areas.forEach(area => {
-                    areaSelect.innerHTML += `<option value="${area.id}">${area.nombre_area}</option>`;
+                    const isOther = area.nombre_area.toLowerCase() === 'otras áreas' ? 'true' : 'false';
+                    areaSelect.innerHTML += `<option value="${area.id}" data-other-area="${isOther}">${area.nombre_area}</option>`;
                 });
             }
         });
 
-    // 2. Cargar personas cuando se selecciona un área
     areaSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const isOtherArea = selectedOption.getAttribute('data-other-area') === 'true';
         const areaId = this.value;
-        peopleContainer.innerHTML = '';
-        if (!areaId) {
-            peopleFieldset.classList.add('hidden');
-            return;
-        }
-        peopleFieldset.classList.remove('hidden');
-        peopleContainer.innerHTML = '<p class="loading">Cargando personal...</p>';
 
-        fetch(`${App.dataUrl}?action=get_people_by_area&area_id=${areaId}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.people.length > 0) {
+        peopleFieldset.classList.add('hidden');
+        otherAreaFieldset.classList.add('hidden');
+
+        if (!areaId) return;
+
+        if (isOtherArea) {
+            otherAreaFieldset.classList.remove('hidden');
+            // La función renderServicesOnly ya crea todos los campos necesarios.
+            // No necesitamos hacer un fetch aquí, solo llamamos la función con datos estáticos de estructura.
+            renderServicesOnly([], [], otherAreaServicesContainer);
+        } else {
+            peopleFieldset.classList.remove('hidden');
+            peopleContainer.innerHTML = '<p class="loading">Cargando personal...</p>';
+            fetch(`api/data.php?action=get_people_by_area&area_id=${areaId}`)
+                .then(res => res.json())
+                .then(data => {
                     renderPeopleCards(data.people, data.sedes, data.transport_options, peopleContainer);
-                } else {
-                    peopleContainer.innerHTML = '<p>No hay personas activas en el área seleccionada.</p>';
-                }
-            });
+                });
+        }
     });
 
-    // 3. Envío del formulario
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
-        grecaptcha.ready(function() {
-            grecaptcha.execute(App.recaptchaSiteKey, { action: 'submit_programming' }).then(function(token) {
-                document.getElementById('recaptcha-response').value = token;
-                const formData = new FormData(form);
-                formData.append('action', 'submit_form'); // Acción para el handler de la API
+        const formData = new FormData(form);
+        formData.append('action', 'submit_form');
 
-                fetch(App.apiUrl, { method: 'POST', body: formData })
-                    .then(res => res.json())
-                    .then(data => {
-                        formMessages.className = data.success ? 'success-message' : 'error-message';
-                        formMessages.textContent = data.message;
-                        if (data.success) {
-                            form.reset();
-                            peopleFieldset.classList.add('hidden');
-                            areaSelect.value = '';
-                        }
-                    })
-                    .catch(() => {
-                        formMessages.className = 'error-message';
-                        formMessages.textContent = 'Error de conexión. Por favor, intente de nuevo.';
-                    })
-                    .finally(() => {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Programación';
-                    });
+        fetch('api/handler.php', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                formMessages.innerHTML = `<div class="${data.success ? 'success-message' : 'error-message'}">${data.message}</div>`;
+                if (data.success) {
+                    form.reset();
+                    peopleFieldset.classList.add('hidden');
+                    otherAreaFieldset.classList.add('hidden');
+                    areaSelect.value = '';
+                }
+            })
+            .catch(() => {
+                formMessages.innerHTML = `<div class="error-message">Error de conexión. Por favor, intente de nuevo.</div>`;
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Programación';
             });
-        });
     });
 });
 
+
+function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'other') {
+    // Esta función ahora solo renderiza los campos de servicios, no los de nombre/área.
+    container.innerHTML = `
+        <div class="person-card">
+            <div class="card-content">
+                <div class="service-section">
+                    <h5><i class="fas fa-utensils"></i> Alimentación</h5>
+                    <label><input type="checkbox" name="${namePrefix}[desayuno]" value="1"> Desayuno</label>
+                    <label><input type="checkbox" name="${namePrefix}[almuerzo]" value="1"> Almuerzo</label>
+                    <label><input type="checkbox" name="${namePrefix}[comida]" value="1"> Comida</label>
+                    <label><input type="checkbox" name="${namePrefix}[refrigerio_tipo1]" value="1"> Refrigerio Tipo 1</label>
+                    <label><input type="checkbox" name="${namePrefix}[refrigerio_capacitacion]" value="1"> Refrigerio Capacitación</label>
+                </div>
+                <div class="service-section">
+                    <h5><i class="fas fa-bus"></i> Transporte</h5>
+                    <label>Tipo:</label>
+                    <select name="${namePrefix}[transporte_tipo]" required>
+                        <option value="Ruta Ordinaria Diurna">Ruta Ordinaria Diurna</option>
+                        <option value="Ruta Ordinaria Nocturna">Ruta Ordinaria Nocturna</option>
+                        <option value="Ruta Operación Diurna">Ruta Operación Diurna</option>
+                        <option value="Ruta Operación Nocturna">Ruta Operación Nocturna</option>
+                        <option value="Ruta Cambio Ing. Disponible">Ruta Cambio Ing. Disponible</option>
+                        <option value="Camioneta Renting">Camioneta Renting</option>
+                        <option value="Ingeniero Disponible">Ingeniero Disponible</option>
+                        <option value="Vehículo Propio">Vehículo Propio</option>
+                        <option value="No requiere">No requiere</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="service-section">
+                     <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino *</h5>
+                     <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="1" required> Betania</label>
+                     <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="2" required> El Quimbo</label>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function renderPeopleCards(people, sedes, transportOptions, container) {
     let html = '';
+    if (!people || people.length === 0) {
+        container.innerHTML = '<p>No hay personas activas en el área seleccionada.</p>';
+        return;
+    }
     people.forEach(person => {
         const pId = person.id;
         html += `
@@ -109,11 +156,7 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
                     </div>
                     <div class="service-section">
                          <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino</h5>
-                         ${sedes.map(sede => `
-                            <label class="radio-label">
-                                <input type="radio" name="people[${pId}][id_sede]" value="${sede.id}" required> ${sede.nombre_sede}
-                            </label>
-                         `).join('')}
+                         ${sedes.map(sede => `<label class="radio-label"><input type="radio" name="people[${pId}][id_sede]" value="${sede.id}" required> ${sede.nombre_sede}</label>`).join('')}
                     </div>
                 </div>
             </div>

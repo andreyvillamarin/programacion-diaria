@@ -1,23 +1,19 @@
 <?php
 require_once '../includes/init.php';
-// Solo rol Administrador (ID 1)
 if ($_SESSION['user_rol'] != 1) { die('Acceso Denegado'); }
 
-// Lógica para manejar las acciones del formulario (Añadir, Editar)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'add_area' && !empty($_POST['nombre_area'])) {
         $stmt = $pdo->prepare("INSERT INTO areas (nombre_area) VALUES (?)");
         $stmt->execute([$_POST['nombre_area']]);
     }
-    // Aquí iría la lógica para editar, activar/desactivar...
-    header("Location: areas.php"); // Redirigir para limpiar el POST
+    header("Location: areas.php");
     exit;
 }
 
 $page_title = "Gestión de Áreas";
 include '../templates/header.php';
 
-// Obtener todas las áreas para mostrarlas en la tabla
 $areas = $pdo->query("SELECT * FROM areas ORDER BY nombre_area")->fetchAll();
 ?>
 
@@ -58,8 +54,13 @@ $areas = $pdo->query("SELECT * FROM areas ORDER BY nombre_area")->fetchAll();
                         <td><?= htmlspecialchars($area['nombre_area']) ?></td>
                         <td><?= $area['activa'] ? 'Activa' : 'Inactiva' ?></td>
                         <td>
-                            <a href="#" class="btn btn-sm">Editar</a>
-                            </td>
+                            <?php if (strtolower($area['nombre_area']) !== 'otras áreas'): ?>
+                                <a href="area-editar.php?id=<?= $area['id'] ?>" class="btn btn-sm">Editar</a>
+                                <a href="eliminar.php?tipo=area&id=<?= $area['id'] ?>" class="btn btn-sm btn-danger delete-btn">Eliminar</a>
+                            <?php else: ?>
+                                <span>(Área Fija)</span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

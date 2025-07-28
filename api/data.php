@@ -19,10 +19,9 @@ try {
             $stmt->execute([$area_id]);
             $response['people'] = $stmt->fetchAll();
 
-            $stmt = $pdo->query("SELECT id, nombre_sede FROM sedes ORDER BY nombre_sede");
-            $response['sedes'] = $stmt->fetchAll();
+            $stmt_sedes = $pdo->query("SELECT id, nombre_sede FROM sedes ORDER BY nombre_sede");
+            $response['sedes'] = $stmt_sedes->fetchAll();
             
-            // Obtener las opciones del ENUM de transporte
             $result = $pdo->query("SHOW COLUMNS FROM `detalle_programacion` LIKE 'transporte_tipo'");
             preg_match("/^enum\(\'(.*)\'\)$/", $result->fetch()['Type'], $matches);
             $response['transport_options'] = explode("','", $matches[1]);
@@ -32,9 +31,22 @@ try {
             $response['message'] = 'ID de área no válido.';
         }
     }
+    
+    if ($action === 'get_services_only') {
+        $stmt_sedes = $pdo->query("SELECT id, nombre_sede FROM sedes ORDER BY nombre_sede");
+        $response['sedes'] = $stmt_sedes->fetchAll();
+        
+        $result = $pdo->query("SHOW COLUMNS FROM `detalle_programacion` LIKE 'transporte_tipo'");
+        preg_match("/^enum\(\'(.*)\'\)$/", $result->fetch()['Type'], $matches);
+        $response['transport_options'] = explode("','", $matches[1]);
+        
+        $response['success'] = true;
+    }
+
 } catch (PDOException $e) {
     error_log($e->getMessage());
     $response['message'] = 'Error de base de datos.';
 }
 
 echo json_encode($response);
+?>

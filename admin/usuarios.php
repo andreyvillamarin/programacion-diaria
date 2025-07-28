@@ -78,7 +78,12 @@ $sedes = $pdo->query("SELECT * FROM sedes")->fetchAll();
                         <td><?= htmlspecialchars($usuario['nombre_rol']) ?></td>
                         <td><?= htmlspecialchars($usuario['nombre_sede'] ?? 'N/A') ?></td>
                         <td><?= $usuario['activo'] ? 'Activo' : 'Inactivo' ?></td>
-                        <td><a href="#" class="btn btn-sm">Editar</a></td>
+                        <td>
+    <a href="usuario-editar.php?id=<?= $usuario['id'] ?>" class="btn btn-sm">Editar</a>
+    <?php if ($usuario['id'] != $_SESSION['user_id']): // Prevenir auto-eliminación ?>
+        <a href="eliminar.php?tipo=usuario&id=<?= $usuario['id'] ?>" class="btn btn-sm btn-danger delete-btn">Eliminar</a>
+    <?php endif; ?>
+</td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

@@ -58,7 +58,10 @@ $areas_activas = $pdo->query("SELECT id, nombre_area FROM areas WHERE activa = 1
                         <td><?= htmlspecialchars($persona['nombre_completo']) ?></td>
                         <td><?= htmlspecialchars($persona['nombre_area']) ?></td>
                         <td><?= $persona['activo'] ? 'Activo' : 'Inactivo' ?></td>
-                        <td><a href="#" class="btn btn-sm">Editar</a></td>
+<td>
+    <a href="persona-editar.php?id=<?= $persona['id'] ?>" class="btn btn-sm">Editar</a>
+    <a href="eliminar.php?tipo=persona&id=<?= $persona['id'] ?>" class="btn btn-sm btn-danger delete-btn">Eliminar</a>
+</td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
