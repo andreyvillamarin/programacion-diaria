@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dateSelector) {
         const dashboardContent = document.getElementById('dashboard-content');
         const finalizeBtn = document.getElementById('finalize-day-btn');
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
         const loadDashboardData = (date) => {
             dashboardContent.innerHTML = '<p class="loading-placeholder">Cargando datos de programación...</p>';
@@ -211,6 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         finalizeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Finalizar y Enviar Reportes';
                     });
             }
+        });
+
+        downloadPdfBtn.addEventListener('click', () => {
+            const date = dateSelector.value;
+            window.open(`../api/handler.php?action=download_pdf&date=${date}`, '_blank');
         });
 
         loadDashboardData(dateSelector.value);
