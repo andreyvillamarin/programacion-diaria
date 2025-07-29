@@ -101,3 +101,77 @@
 [29-Jul-2025 06:10:13 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
 [29-Jul-2025 06:13:06 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
 [29-Jul-2025 06:14:45 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:37:14 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:43:49 America/Bogota] Received submission: Array
+(
+    [area] => 5
+    [email_solicitante] => aa@aa.com
+    [fecha_programacion] => 2025-07-30
+    [other] => Array
+        (
+            [nombre_manual] => sdasdasd
+            [area_wbe] => asdasdasd
+            [actividad] => asdsadas
+            [desayuno] => 1
+            [almuerzo] => 1
+            [transporte_tipo] => Ruta Operación Diurna
+            [id_sede] => 1
+        )
+
+    [recaptcha_response] => 
+    [action] => submit_form
+)
+
+[29-Jul-2025 06:43:49 America/Bogota] Area ID: 5, Fetched Area Name: 'Otras Áreas', Trimmed and lowercased: 'otras Áreas'
+[29-Jul-2025 06:43:49 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:53:22 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para 3.
+[29-Jul-2025 06:56:55 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para 3.
+[29-Jul-2025 06:57:11 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para 3.
+[29-Jul-2025 07:00:07 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para Ana Ibette Polania Herrera.
+[29-Jul-2025 07:08:00 America/Bogota] Received submission: Array
+(
+    [area] => 1
+    [email_solicitante] => aa@aa.com
+    [fecha_programacion] => 2025-07-30
+    [people] => Array
+        (
+            [3] => Array
+                (
+                    [transporte_tipo] => Ruta Ordinaria Diurna
+                )
+
+            [1] => Array
+                (
+                    [desayuno] => 1
+                    [almuerzo] => 1
+                    [transporte_tipo] => Ruta Ordinaria Nocturna
+                    [id_sede] => 1
+                )
+
+        )
+
+    [recaptcha_response] => 
+    [action] => submit_form
+)
+
+[29-Jul-2025 07:08:00 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para Ana Ibette Polania Herrera.
+[29-Jul-2025 07:11:59 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para Ana Ibette Polania Herrera ya que se ha seleccionado un tipo de transporte.
+[29-Jul-2025 07:13:53 America/Bogota] People data: Array
+(
+    [3] => Array
+        (
+            [transporte_tipo] => Ruta Ordinaria Diurna
+        )
+
+    [1] => Array
+        (
+            [desayuno] => 1
+            [almuerzo] => 1
+            [transporte_tipo] => Ruta Ordinaria Nocturna
+            [id_sede] => 1
+        )
+
+)
+
+[29-Jul-2025 07:13:53 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para Ana Ibette Polania Herrera ya que se ha seleccionado un tipo de transporte.
+[29-Jul-2025 07:19:30 America/Bogota] Error en submit_form: Se debe seleccionar una sede de destino para Ana Ibette Polania Herrera ya que se ha seleccionado un tipo de transporte.

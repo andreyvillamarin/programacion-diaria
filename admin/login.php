@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_nombre'] = $user['nombre'];
             $_SESSION['user_rol'] = $user['id_rol'];
-            $_SESSION['user_sede'] = $user['id_sede']; // Importante para el Chef
+            $_SESSION['user_sede'] = $user['id_sede']; // Importante para el Casino
             header('Location: index.php');
             exit;
         } else {

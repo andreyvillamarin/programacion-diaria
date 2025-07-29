@@ -53,10 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
+        
+        let isValid = true;
+        form.querySelectorAll('input[required], select[required], textarea[required]').forEach(input => {
+            if (input.offsetWidth > 0 || input.offsetHeight > 0) {
+                if (!input.checkValidity()) {
+                    isValid = false;
+                    input.reportValidity();
+                }
+            }
+        });
+
+        if (!isValid) return;
 
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
@@ -124,14 +132,14 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
                         <option value="Camioneta Renting">Camioneta Renting</option>
                         <option value="Ingeniero Disponible">Ingeniero Disponible</option>
                         <option value="Vehículo Propio">Vehículo Propio</option>
-                        <option value="No requiere" selected>No requiere</option>
+                        <option value="No requiere">No requiere</option>
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
                 <div class="service-section">
                      <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino *</h5>
                      <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="1" required> Betania</label>
-                     <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="2" required> El Quimbo</label>
+                     <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="2" required> Quimbo</label>
                 </div>
             </div>
         </div>
@@ -161,13 +169,14 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
                     <div class="service-section">
                         <h5><i class="fas fa-bus"></i> Transporte</h5>
                         <label for="transport-${pId}">Tipo:</label>
-                        <select id="transport-${pId}" name="people[${pId}][transporte_tipo]" required>
+                        <select id="transport-${pId}" name="people[${pId}][transporte_tipo]">
+                            <option value="">-- Seleccione --</option>
                             ${transportOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
                     </div>
                     <div class="service-section">
                          <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino</h5>
-                         ${sedes.map(sede => `<label class="radio-label"><input type="radio" name="people[${pId}][id_sede]" value="${sede.id}" required> ${sede.nombre_sede}</label>`).join('')}
+                         ${sedes.map(sede => `<label class="radio-label"><input type="radio" name="people[${pId}][id_sede]" value="${sede.id}"> ${sede.nombre_sede}</label>`).join('')}
                     </div>
                 </div>
             </div>

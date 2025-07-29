@@ -22,7 +22,8 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
                     <div class="service-section">
                         <h5><i class="fas fa-bus"></i> Transporte</h5>
                         <label for="transport-${pId}">Tipo:</label>
-                        <select id="transport-${pId}" name="people[${pId}][transporte_tipo]" required>
+                        <select id="transport-${pId}" name="people[${pId}][transporte_tipo]">
+                            <option value="">-- Seleccione --</option>
                             ${transportOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
                     </div>
@@ -30,7 +31,7 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
                          <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino</h5>
                          ${sedes.map(sede => `
                             <label class="radio-label">
-                                <input type="radio" name="people[${pId}][id_sede]" value="${sede.id}" required> ${sede.nombre_sede}
+                                <input type="radio" name="people[${pId}][id_sede]" value="${sede.id}"> ${sede.nombre_sede}
                             </label>
                          `).join('')}
                     </div>
@@ -68,15 +69,16 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
                 <div class="service-section">
                     <h5><i class="fas fa-bus"></i> Transporte</h5>
                     <label>Tipo:</label>
-                    <select name="${namePrefix}[transporte_tipo]" required>
+                    <select name="${namePrefix}[transporte_tipo]">
+                        <option value="">-- Seleccione --</option>
                         ${transportOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                     </select>
                 </div>
                 <div class="service-section">
-                     <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino *</h5>
+                     <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino</h5>
                      ${sedes.map(sede => `
                         <label class="radio-label">
-                            <input type="radio" name="${namePrefix}[id_sede]" value="${sede.id}" required> ${sede.nombre_sede}
+                            <input type="radio" name="${namePrefix}[id_sede]" value="${sede.id}"> ${sede.nombre_sede}
                         </label>
                      `).join('')}
                 </div>
@@ -110,29 +112,78 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const renderDashboardTable = (programacion, container) => {
+            const deleteSelectedBtn = document.getElementById('delete-selected-btn');
             if (programacion.length === 0) {
                 container.innerHTML = '<p>No hay programaciones pendientes para la fecha seleccionada.</p>';
+                deleteSelectedBtn.style.display = 'none';
                 return;
             }
-            let tableHtml = `<table class="data-table"><thead><tr><th>Persona</th><th>Sede</th><th>D</th><th>A</th><th>C</th><th>R1</th><th>RC</th><th>Transporte</th><th>Solicitante</th><th>Acción</th></tr></thead><tbody>`;
+            let tableHtml = `<table class="data-table"><thead><tr><th><input type="checkbox" id="select-all-checkbox"></th><th>Persona</th><th>Área | WBE</th><th>Actividad</th><th>Sede</th><th>D</th><th>A</th><th>C</th><th>R1</th><th>RC</th><th>Transporte</th><th>Solicitante</th><th>Acción</th></tr></thead><tbody>`;
             programacion.forEach(item => {
                 const displayName = item.nombre_completo || item.nombre_manual || '(No especificado)';
+                const areaWbe = item.id_persona ? item.nombre_area : item.area_wbe;
                 tableHtml += `
                     <tr data-detail-id="${item.id}">
+                        <td><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
                         <td>${displayName}</td>
+                        <td>${areaWbe}</td>
+                        <td>${item.actividad || ''}</td>
                         <td>${item.nombre_sede}</td>
-                        <td class="check-cell">${item.desayuno ? '✔️' : ''}</td>
-                        <td class="check-cell">${item.almuerzo ? '✔️' : ''}</td>
-                        <td class="check-cell">${item.comida ? '✔️' : ''}</td>
-                        <td class="check-cell">${item.refrigerio_tipo1 ? '✔️' : ''}</td>
-                        <td class="check-cell">${item.refrigerio_capacitacion ? '✔️' : ''}</td>
+                        <td class="check-cell">${parseInt(item.desayuno) ? '✔️' : ''}</td>
+                        <td class="check-cell">${parseInt(item.almuerzo) ? '✔️' : ''}</td>
+                        <td class="check-cell">${parseInt(item.comida) ? '✔️' : ''}</td>
+                        <td class="check-cell">${parseInt(item.refrigerio_tipo1) ? '✔️' : ''}</td>
+                        <td class="check-cell">${parseInt(item.refrigerio_capacitacion) ? '✔️' : ''}</td>
                         <td>${item.transporte_tipo}</td>
                         <td>${item.email_solicitante}</td>
-                        <td><a href="eliminar.php?tipo=detalle_programacion&id=${item.id}" class="btn btn-sm btn-danger delete-btn"><i class="fas fa-trash"></i></a></td>
+                        <td>
+                            <a href="registro-editar.php?id=${item.id}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Editar</a>
+                            <a href="eliminar.php?tipo=detalle_programacion&id=${item.id}" class="btn btn-sm btn-danger delete-btn"><i class="fas fa-trash"></i> Eliminar</a>
+                        </td>
                     </tr>`;
             });
             tableHtml += `</tbody></table>`;
             container.innerHTML = tableHtml;
+
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+
+            const toggleDeleteButton = () => {
+                const anyChecked = Array.from(rowCheckboxes).some(checkbox => checkbox.checked);
+                deleteSelectedBtn.style.display = anyChecked ? 'inline-block' : 'none';
+            };
+
+            selectAllCheckbox.addEventListener('change', (e) => {
+                rowCheckboxes.forEach(checkbox => checkbox.checked = e.target.checked);
+                toggleDeleteButton();
+            });
+
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    if (!checkbox.checked) {
+                        selectAllCheckbox.checked = false;
+                    }
+                    toggleDeleteButton();
+                });
+            });
+
+            deleteSelectedBtn.addEventListener('click', () => {
+                const selectedIds = Array.from(rowCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+                if (selectedIds.length > 0 && confirm(`¿Está seguro de eliminar ${selectedIds.length} registros?`)) {
+                    const formData = new FormData();
+                    formData.append('action', 'bulk_delete');
+                    formData.append('ids', JSON.stringify(selectedIds));
+
+                    fetch('../api/handler.php', { method: 'POST', body: formData })
+                        .then(res => res.json())
+                        .then(data => {
+                            alert(data.message);
+                            if (data.success) {
+                                loadDashboardData(dateSelector.value);
+                            }
+                        });
+                }
+            });
         };
 
         dateSelector.addEventListener('change', () => loadDashboardData(dateSelector.value));
@@ -243,10 +294,17 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const saveBtn = document.getElementById('save-manual-entry-btn');
 
-            if (!manualAddForm.checkValidity()) {
-                manualAddForm.reportValidity();
-                return;
-            }
+            let isValid = true;
+            manualAddForm.querySelectorAll('input[required], select[required], textarea[required]').forEach(input => {
+                if (input.offsetWidth > 0 || input.offsetHeight > 0) {
+                    if (!input.checkValidity()) {
+                        isValid = false;
+                        input.reportValidity();
+                    }
+                }
+            });
+
+            if (!isValid) return;
 
             saveBtn.disabled = true;
             saveBtn.textContent = 'Guardando...';

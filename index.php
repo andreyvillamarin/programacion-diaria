@@ -52,8 +52,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="requester-email">Tu Correo Electrónico *</label>
-                        <input type="email" id="requester-email" name="email_solicitante" required placeholder="tu.correo@ejemplo.com">
+                        <label for="requester-email">Tu Correo Electrónico</label>
+                        <input type="email" id="requester-email" name="email_solicitante" placeholder="tu.correo@ejemplo.com">
                     </div>
                      <div class="form-group">
                         <label for="programming-date">Fecha de Programación</label>

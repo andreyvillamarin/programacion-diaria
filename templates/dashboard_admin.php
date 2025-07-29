@@ -7,6 +7,7 @@
     </div>
     <div class="control-buttons">
         <button id="add-manual-btn" class="btn btn-secondary"><i class="fas fa-plus"></i> Añadir Registro Manual</button>
+        <button id="delete-selected-btn" class="btn btn-danger" style="display: none;"><i class="fas fa-trash"></i> Eliminar Seleccionados</button>
         <button id="finalize-day-btn" class="btn btn-success"><i class="fas fa-check-circle"></i> Finalizar y Enviar Reportes</button>
     </div>
 </div>
@@ -30,8 +31,8 @@
                         <select id="modal-area-select" name="area" required></select>
                     </div>
                     <div class="form-group">
-                        <label for="modal-requester-email">Correo del Solicitante *</label>
-                        <input type="email" id="modal-requester-email" name="email_solicitante" required value="<?= $_SESSION['user_email'] ?? ''?>">
+                        <label for="modal-requester-email">Correo del Solicitante</label>
+                        <input type="email" id="modal-requester-email" name="email_solicitante" value="<?= $_SESSION['user_email'] ?? ''?>">
                     </div>
                     <div class="form-group">
                         <label for="modal-programming-date">Fecha de Programación *</label>

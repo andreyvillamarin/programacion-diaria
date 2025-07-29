@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $email = $_POST['email'];
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $id_rol = $_POST['id_rol'];
-        // La sede solo se asigna si el rol es Chef (ID 2)
+        // La sede solo se asigna si el rol es Casino (ID 2)
         $id_sede = ($id_rol == 2) ? $_POST['id_sede'] : null;
 
         $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, email, password, id_rol, id_sede) VALUES (?, ?, ?, ?, ?)");
@@ -54,7 +54,7 @@ $sedes = $pdo->query("SELECT * FROM sedes")->fetchAll();
                 </div>
                 <div class="form-group hidden" id="sede-select-group">
                     <select name="id_sede">
-                        <option value="">-- Asignar Sede al Chef --</option>
+                        <option value="">-- Asignar Sede al Casino --</option>
                          <?php foreach ($sedes as $sede): ?>
                             <option value="<?= $sede['id'] ?>"><?= htmlspecialchars($sede['nombre_sede']) ?></option>
                         <?php endforeach; ?>
@@ -93,10 +93,10 @@ $sedes = $pdo->query("SELECT * FROM sedes")->fetchAll();
 </div>
 
 <script>
-// Script para mostrar el selector de sede solo si el rol es "Chef" (ID 2)
+// Script para mostrar el selector de sede solo si el rol es "Casino" (ID 2)
 document.getElementById('role-select').addEventListener('change', function() {
     const sedeGroup = document.getElementById('sede-select-group');
-    if (this.value == '2') { // ID del rol "Chef"
+    if (this.value == '2') { // ID del rol "Casino"
         sedeGroup.classList.remove('hidden');
         sedeGroup.querySelector('select').required = true;
     } else {

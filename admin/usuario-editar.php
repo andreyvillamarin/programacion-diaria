@@ -93,7 +93,7 @@ include '../templates/header.php';
                 </div>
 
                 <div class="form-group <?= ($user['id_rol'] != 2) ? 'hidden' : '' ?>" id="sede-select-group">
-                    <label for="sede-select">Sede Asignada (solo para Chefs)</label>
+                    <label for="sede-select">Sede Asignada (solo para Casino)</label>
                     <select name="id_sede" id="sede-select">
                         <option value="">-- Ninguna --</option>
                          <?php foreach ($sedes as $sede): ?>
@@ -122,10 +122,10 @@ include '../templates/header.php';
 </div>
 
 <script>
-// Muestra/oculta el selector de sede si el rol cambia a "Chef"
+// Muestra/oculta el selector de sede si el rol cambia a "Casino"
 document.getElementById('role-select').addEventListener('change', function() {
     const sedeGroup = document.getElementById('sede-select-group');
-    if (this.value == '2') { // ID del rol "Chef"
+    if (this.value == '2') { // ID del rol "Casino"
         sedeGroup.classList.remove('hidden');
     } else {
         sedeGroup.classList.add('hidden');
