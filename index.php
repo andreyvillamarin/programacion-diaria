@@ -67,19 +67,7 @@
                 </fieldset>
 
                 <fieldset id="other-area-fieldset" class="hidden">
-                    <legend>Datos de la Persona</legend>
-                    <div class="form-group">
-                        <label for="manual-name">Nombre Completo *</label>
-                        <input type="text" id="manual-name" name="other[nombre_manual]">
-                    </div>
-                    <div class="form-group">
-                        <label for="manual-area">Área | WBE *</label>
-                        <input type="text" id="manual-area" name="other[area_wbe]">
-                    </div>
-                    <div class="form-group">
-                        <label for="manual-activity">Actividad a Realizar *</label>
-                        <textarea id="manual-activity" name="other[actividad]"></textarea>
-                    </div>
+                    <legend>Datos de la Persona y Servicios</legend>
                     <div id="other-area-services"></div>
                 </fieldset>
 

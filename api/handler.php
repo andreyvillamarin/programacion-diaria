@@ -29,7 +29,7 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_prog->execute([$fecha, $email]);
         $prog_id = $pdo->lastInsertId();
 
-        if (strtolower($area_nombre) === 'otras áreas') {
+        if (strcasecmp($area_nombre, 'otras áreas') == 0) {
             $details = $_POST['other'];
             if (empty($details['nombre_manual']) || empty($details['area_wbe']) || empty($details['actividad'])) {
                  throw new Exception("Faltan datos en el formulario de Otras Áreas.");

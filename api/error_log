@@ -1,1 +1,103 @@
 [28-Jul-2025 08:50:32 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 11:47:09 America/Bogota] Error en submit_form: SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'id_sede' cannot be null
+[28-Jul-2025 11:54:43 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 11:57:28 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 12:16:02 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 12:18:45 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 12:24:11 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 12:29:43 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 12:36:51 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 12:43:52 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:07:17 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:25:28 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:25:57 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:33:02 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:33:29 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:33:44 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:37:49 America/Bogota] Received submit_form action. POST data: Array
+(
+    [area] => 5
+    [email_solicitante] => aa@aa.com
+    [fecha_programacion] => 2025-07-29
+    [other] => Array
+        (
+            [nombre_manual] => fwerwerwer
+            [area_wbe] => ewrwerwe
+            [actividad] => werewrewrwerwerwer
+            [desayuno] => 1
+            [almuerzo] => 1
+            [transporte_tipo] => Ruta Operación Nocturna
+            [id_sede] => 1
+        )
+
+    [recaptcha_response] => 
+    [action] => submit_form
+)
+
+[28-Jul-2025 15:37:49 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[28-Jul-2025 15:46:42 America/Bogota] Received submit_form action. POST data: Array
+(
+    [area] => 5
+    [email_solicitante] => aa@aa.com
+    [fecha_programacion] => 2025-07-29
+    [other] => Array
+        (
+            [nombre_manual] => erewrewr
+            [area_wbe] => werrerwer
+            [actividad] => ewrwerwerwer
+            [desayuno] => 1
+            [almuerzo] => 1
+            [transporte_tipo] => Ruta Operación Diurna
+            [id_sede] => 1
+        )
+
+    [recaptcha_response] => 
+    [action] => submit_form
+)
+
+[28-Jul-2025 15:46:42 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:04:19 America/Bogota] Received submit_form action. POST data: Array
+(
+    [area] => 5
+    [email_solicitante] => aa@aa.com
+    [fecha_programacion] => 2025-07-30
+    [other] => Array
+        (
+            [nombre_manual] => sddasda
+            [area_wbe] => sdasdd
+            [actividad] => adsdda
+            [desayuno] => 1
+            [almuerzo] => 1
+            [transporte_tipo] => Ruta Operación Nocturna
+            [id_sede] => 1
+        )
+
+    [recaptcha_response] => 
+    [action] => submit_form
+)
+
+[29-Jul-2025 06:04:19 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:10:13 America/Bogota] Received submit_form action. POST data: Array
+(
+    [area] => 5
+    [email_solicitante] => aa@aa.com
+    [fecha_programacion] => 2025-07-30
+    [other] => Array
+        (
+            [nombre_manual] => werwerwere
+            [area_wbe] => werwerwe
+            [actividad] => rewrewrwerwerwe
+            [desayuno] => 1
+            [almuerzo] => 1
+            [transporte_tipo] => Camioneta Renting
+            [id_sede] => 1
+        )
+
+    [recaptcha_response] => 
+    [action] => submit_form
+)
+
+[29-Jul-2025 06:10:13 America/Bogota] Area nombre: Otras Áreas
+[29-Jul-2025 06:10:13 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:13:06 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.
+[29-Jul-2025 06:14:45 America/Bogota] Error en submit_form: No se seleccionó ninguna persona para programar.

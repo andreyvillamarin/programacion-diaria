@@ -39,8 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isOtherArea) {
             otherAreaFieldset.classList.remove('hidden');
-            // La función renderServicesOnly ya crea todos los campos necesarios.
-            // No necesitamos hacer un fetch aquí, solo llamamos la función con datos estáticos de estructura.
             renderServicesOnly([], [], otherAreaServicesContainer);
         } else {
             peopleFieldset.classList.remove('hidden');
@@ -89,9 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'other') {
-    // Esta función ahora solo renderiza los campos de servicios, no los de nombre/área.
     container.innerHTML = `
         <div class="person-card">
+            <div class="card-header">
+                <div class="form-group">
+                    <label for="other-name">Nombre Completo *</label>
+                    <input type="text" id="other-name" name="${namePrefix}[nombre_manual]" required>
+                </div>
+                <div class="form-group">
+                    <label for="other-area-wbe">Área WBE *</label>
+                    <input type="text" id="other-area-wbe" name="${namePrefix}[area_wbe]" required>
+                </div>
+                 <div class="form-group">
+                    <label for="other-activity">Actividad a Realizar *</label>
+                    <textarea id="other-activity" name="${namePrefix}[actividad]" rows="2" required></textarea>
+                </div>
+            </div>
             <div class="card-content">
                 <div class="service-section">
                     <h5><i class="fas fa-utensils"></i> Alimentación</h5>
@@ -113,7 +124,7 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
                         <option value="Camioneta Renting">Camioneta Renting</option>
                         <option value="Ingeniero Disponible">Ingeniero Disponible</option>
                         <option value="Vehículo Propio">Vehículo Propio</option>
-                        <option value="No requiere">No requiere</option>
+                        <option value="No requiere" selected>No requiere</option>
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
