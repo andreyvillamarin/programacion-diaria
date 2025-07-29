@@ -83,6 +83,64 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+if ($action === 'download_pdf' && isset($_GET['date'])) {
+    require_once '../includes/lib/fpdf/fpdf.php';
+
+    try {
+        $date = $_GET['date'];
+        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
+        $stmt->execute([$date]);
+        $programacion = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',16);
+        $pdf->Cell(0,10, "Programacion para el dia: " . $date, 0, 1, 'C');
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->Cell(40,10,'Persona',1);
+        $pdf->Cell(40,10,'Area | WBE',1);
+        $pdf->Cell(40,10,'Actividad',1);
+        $pdf->Cell(25,10,'Sede',1);
+        $pdf->Cell(10,10,'D',1);
+        $pdf->Cell(10,10,'A',1);
+        $pdf->Cell(10,10,'C',1);
+        $pdf->Cell(10,10,'R1',1);
+        $pdf->Cell(10,10,'RC',1);
+        $pdf->Cell(30,10,'Transporte',1);
+        $pdf->Cell(40,10,'Solicitante',1);
+        $pdf->Ln();
+
+        $pdf->SetFont('Arial','',8);
+        foreach($programacion as $row) {
+            $displayName = $row['nombre_completo'] ?: $row['nombre_manual'];
+            $areaWbe = $row['id_persona'] ? $row['nombre_area'] : $row['area_wbe'];
+
+            $pdf->Cell(40,10,utf8_decode($displayName),1);
+            $pdf->Cell(40,10,utf8_decode($areaWbe),1);
+            $pdf->Cell(40,10,utf8_decode($row['actividad']),1);
+            $pdf->Cell(25,10,utf8_decode($row['nombre_sede']),1);
+            $pdf->Cell(10,10,$row['desayuno'] ? 'X' : '',1, 0, 'C');
+            $pdf->Cell(10,10,$row['almuerzo'] ? 'X' : '',1, 0, 'C');
+            $pdf->Cell(10,10,$row['comida'] ? 'X' : '',1, 0, 'C');
+            $pdf->Cell(10,10,$row['refrigerio_tipo1'] ? 'X' : '',1, 0, 'C');
+            $pdf->Cell(10,10,$row['refrigerio_capacitacion'] ? 'X' : '',1, 0, 'C');
+            $pdf->Cell(30,10,utf8_decode($row['transporte_tipo']),1);
+            $pdf->Cell(40,10,utf8_decode($row['email_solicitante']),1);
+            $pdf->Ln();
+        }
+
+        $pdf->Output('D', "programacion_$date.pdf");
+        exit;
+
+    } catch (PDOException $e) {
+        // Manejar errores de base de datos
+        header('HTTP/1.1 500 Internal Server Error');
+        echo "Error de base de datos: " . $e->getMessage();
+        exit;
+    }
+}
+
 
 //======================================================================
 // ACCIONES DEL PANEL DE ADMINISTRACIÓN (SOLO ADMIN)

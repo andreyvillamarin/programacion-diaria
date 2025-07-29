@@ -8,6 +8,7 @@
     <div class="control-buttons">
         <button id="add-manual-btn" class="btn btn-secondary"><i class="fas fa-plus"></i> Añadir Registro Manual</button>
         <button id="delete-selected-btn" class="btn btn-danger" style="display: none;"><i class="fas fa-trash"></i> Eliminar Seleccionados</button>
+        <button id="download-pdf-btn" class="btn btn-info"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
         <button id="finalize-day-btn" class="btn btn-success"><i class="fas fa-check-circle"></i> Finalizar y Enviar Reportes</button>
     </div>
 </div>
