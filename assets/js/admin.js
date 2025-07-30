@@ -213,6 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', () => {
+                const selectedDate = dateSelector.value;
+                if (selectedDate) {
+                    window.open(`../api/handler.php?action=download_pdf&date=${selectedDate}`, '_blank');
+                } else {
+                    alert('Por favor, seleccione una fecha.');
+                }
+            });
+        }
+
         loadDashboardData(dateSelector.value);
     }
 
@@ -474,5 +486,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         generateReportBtn.addEventListener('click', generateCharts);
         generateCharts();
+    }
+
+    // --- LÓGICA PARA BUSCADOR EN TABLAS ---
+    const personSearchInput = document.getElementById('person-search');
+    if (personSearchInput) {
+        personSearchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#personas-table tbody tr');
+            tableRows.forEach(row => {
+                const personName = row.cells[0].textContent.toLowerCase();
+                const areaName = row.cells[1].textContent.toLowerCase();
+                if (personName.includes(searchTerm) || areaName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     }
 });

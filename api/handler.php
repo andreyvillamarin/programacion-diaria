@@ -548,11 +548,16 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
         $pdf->Cell(0,10,$date_range,0,1,'C');
         $pdf->Ln(10);
 
+        $tmpDir = 'tmp/';
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
+
         foreach ($charts as $chart) {
             $img = str_replace('data:image/png;base64,', '', $chart->image);
             $img = str_replace(' ', '+', $img);
             $data = base64_decode($img);
-            $file = 'tmp/' . uniqid() . '.png';
+            $file = $tmpDir . uniqid() . '.png';
             file_put_contents($file, $data);
             
             $pdf->SetFont('Arial','B',14);
