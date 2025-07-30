@@ -582,14 +582,6 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
         $fecha = $_POST['fecha_programacion'];
         $area_id = $_POST['area'];
 
-        $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
-        $check_stmt->execute([$fecha]);
-        if ($check_stmt->fetchColumn() > 0) {
-            $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
-            echo json_encode($response);
-            exit;
-        }
-
         if (!$fecha || !$area_id) { $response['message'] = 'Faltan datos generales.'; }
         else {
             try {
@@ -689,10 +681,10 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
         try {
             $date = $_POST['date'];
             $pdo->beginTransaction();
-            $chef_reports_stmt = $pdo->prepare("SELECT dp.id_sede, s.nombre_sede, SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos, SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1, SUM(dp.refrigerio_capacitacion) as total_ref_cap FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' GROUP BY dp.id_sede");
+            $chef_reports_stmt = $pdo->prepare("SELECT dp.id_sede, s.nombre_sede, SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos, SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1, SUM(dp.refrigerio_capacitacion) as total_ref_cap FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? GROUP BY dp.id_sede");
             $chef_reports_stmt->execute([$date]);
             $chef_reports = $chef_reports_stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
-            $transporter_report_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, s.nombre_sede, dp.transporte_tipo FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id LEFT JOIN personas p ON dp.id_persona = p.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' AND dp.transporte_tipo != 'No requiere' ORDER BY s.nombre_sede, nombre_persona");
+            $transporter_report_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, s.nombre_sede, dp.transporte_tipo FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id LEFT JOIN personas p ON dp.id_persona = p.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere' ORDER BY s.nombre_sede, nombre_persona");
             $transporter_report_stmt->execute([$date]);
             $transporter_report = $transporter_report_stmt->fetchAll();
             $chefs = $pdo->query("SELECT email, id_sede FROM usuarios WHERE id_rol = 2 AND activo = 1")->fetchAll();
@@ -701,7 +693,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                 if (isset($chef_reports[$chef['id_sede']])) {
                     $report_data = $chef_reports[$chef['id_sede']][0];
                     
-                    $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND dp.id_sede = ? AND pr.estado = 'pendiente'");
+                    $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND dp.id_sede = ?");
                     $personas_stmt->execute([$date, $chef['id_sede']]);
                     $personas = $personas_stmt->fetchAll(PDO::FETCH_COLUMN);
                     $personas_list = '<ul><li>' . implode('</li><li>', $personas) . '</li></ul>';
@@ -727,7 +719,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
             }
             $admin_emails = $pdo->query("SELECT email FROM usuarios WHERE id_rol = 1 AND activo = 1")->fetchAll(PDO::FETCH_COLUMN);
             if (!empty($admin_emails)) {
-                $programacion_stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
+                $programacion_stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY p.nombre_completo, dp.nombre_manual" );
                 $programacion_stmt->execute([$date]);
                 $programacion_completa = $programacion_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -756,7 +748,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                 send_brevo_email($admin_emails_brevo, "Consolidado de Programación {$date}", $html_body, $pdo);
             }
 
-            $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ? AND estado = 'pendiente'");
+            $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ?");
             $update_stmt->execute([$date]);
             $pdo->commit();
             $response = ['success' => true, 'message' => '¡Proceso finalizado! Los reportes han sido enviados.'];
