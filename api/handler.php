@@ -162,7 +162,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
             $this->Cell(0,10,utf8_decode($title),0,1,'C',true);
             $this->Ln(4);
         }
-        
+
         function SedeTable($header, $data, $sede)
         {
             $this->TableTitle("Sede: " . $sede);
@@ -307,7 +307,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
         foreach ($programacion as $registro) {
             $programacion_por_sede[$registro['nombre_sede']][] = $registro;
         }
-        
+
         $pdf = new PDF('L', 'mm', 'A4');
         $pdf->AliasNbPages();
         $pdf->AddPage();
@@ -318,7 +318,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
         if (isset($programacion_por_sede['Betania'])) {
             $pdf->SedeTable($header, $programacion_por_sede['Betania'], 'Betania');
         }
-        
+
         if (isset($programacion_por_sede['Quimbo'])) {
             $pdf->SedeTable($header, $programacion_por_sede['Quimbo'], 'Quimbo');
         }
@@ -514,84 +514,6 @@ if (isset($_SESSION['user_rol'])) {
 
     if ($action === 'download_transporter_pdf' && isset($_GET['date'])) {
         require_once '../includes/lib/fpdf/fpdf.php';
-
-        class PDF_Transporter extends FPDF
-        {
-            var $date;
-
-            function Header()
-            {
-                $this->SetFont('Arial','B',15);
-                $this->SetFillColor(23, 32, 42);
-                $this->SetTextColor(255,255,255);
-                $this->Cell(0,15,utf8_decode('Rutas de Transporte para el día: ' . $this->date),0,1,'C',true);
-                $this->Ln(5);
-            }
-
-            function Footer()
-            {
-                $this->SetY(-15);
-                $this->SetFont('Arial','I',8);
-                $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
-            }
-
-            function TableTitle($title)
-            {
-                $this->SetFont('Arial','B',13);
-                $this->SetFillColor(200, 220, 255);
-                $this->Cell(0,10,utf8_decode($title),0,1,'C',true);
-                $this->Ln(4);
-            }
-            
-            function SedeTable($header, $data, $sede)
-            {
-                $this->TableTitle("Sede: " . $sede);
-                $this->SetFillColor(23, 32, 42);
-                $this->SetTextColor(255);
-                $this->SetDrawColor(128);
-                $this->SetLineWidth(.3);
-                $this->SetFont('','B', 10);
-
-                $w = array(70, 50, 50); // Anchos de columna para Nombre, Tipo de Ruta, Zona
-                for($i=0;$i<count($header);$i++)
-                    $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
-                $this->Ln();
-
-                $this->SetTextColor(0);
-                $this->SetFont('','', 9);
-
-                $last_zona = null;
-                $last_transporte = null;
-
-                foreach($data as $row)
-                {
-                    if ($row['zona'] !== $last_zona) {
-                        $this->SetFont('','B', 10);
-                        $this->SetFillColor(211, 211, 211);
-                        $this->Cell(array_sum($w), 8, "Zona: " . utf8_decode($row['zona']), 1, 1, 'C', true);
-                        $last_zona = $row['zona'];
-                        $last_transporte = null;
-                    }
-
-                    if ($row['transporte_tipo'] !== $last_transporte) {
-                        $this->SetFont('','BI', 9);
-                        $this->SetFillColor(230, 230, 230);
-                        $this->Cell(array_sum($w), 7, "Transporte: " . utf8_decode($row['transporte_tipo']), 1, 1, 'L', true);
-                        $last_transporte = $row['transporte_tipo'];
-                    }
-
-                    $this->SetFont('','', 9);
-                    $this->SetFillColor(255, 255, 255);
-                    
-                    $this->Cell($w[0], 6, utf8_decode($row['nombre_completo']), 1);
-                    $this->Cell($w[1], 6, utf8_decode($row['transporte_tipo']), 1);
-                    $this->Cell($w[2], 6, utf8_decode($row['zona']), 1);
-                    $this->Ln();
-                }
-                $this->Cell(array_sum($w),0,'','T');
-                $this->Ln(10);
-            }
-        }
         
         try {
             $date = $_GET['date'];
@@ -602,29 +524,30 @@ if (isset($_SESSION['user_rol'])) {
                  JOIN personas p ON dp.id_persona = p.id
                  JOIN sedes s ON dp.id_sede = s.id
                  WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere'
-                 ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo"
+                 ORDER BY s.nombre_sede, p.nombre_completo"
             );
             $stmt->execute([$date]);
             $reporte = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $reporte_por_sede = [];
-            foreach ($reporte as $registro) {
-                $reporte_por_sede[$registro['nombre_sede']][] = $registro;
-            }
-
-            $pdf = new PDF_Transporter('P', 'mm', 'A4');
-            $pdf->date = $date;
-            $pdf->AliasNbPages();
+            $pdf = new FPDF('P', 'mm', 'A4');
             $pdf->AddPage();
+            $pdf->SetFont('Arial','B',16);
+            $pdf->Cell(0,10, "Rutas de Transporte - " . $date, 0, 1, 'C');
             
-            $header = array('Nombre', 'Tipo de Ruta', 'Zona');
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(70,10,'Persona',1);
+            $pdf->Cell(40,10,'Tipo de Ruta',1);
+            $pdf->Cell(50,10,'Sede Destino',1);
+            $pdf->Cell(30,10,'Zona',1);
+            $pdf->Ln();
 
-            if (isset($reporte_por_sede['Betania'])) {
-                $pdf->SedeTable($header, $reporte_por_sede['Betania'], 'Betania');
-            }
-            
-            if (isset($reporte_por_sede['Quimbo'])) {
-                $pdf->SedeTable($header, $reporte_por_sede['Quimbo'], 'Quimbo');
+            $pdf->SetFont('Arial','',10);
+            foreach($reporte as $row) {
+                $pdf->Cell(70,10,utf8_decode($row['nombre_completo']),1);
+                $pdf->Cell(40,10,utf8_decode($row['transporte_tipo']),1);
+                $pdf->Cell(50,10,utf8_decode($row['nombre_sede']),1);
+                $pdf->Cell(30,10,utf8_decode($row['zona']),1);
+                $pdf->Ln();
             }
 
             $pdf->Output('D', "rutas_transporte_$date.pdf");
