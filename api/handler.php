@@ -324,9 +324,7 @@ if (isset($_SESSION['user_rol'])) {
             $personas_stmt = $pdo->prepare(
                 "SELECT 
                     COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, 
-                    a.nombre_area, 
-                    dp.desayuno, dp.almuerzo, dp.comida, 
-                    dp.refrigerio_tipo1, dp.refrigerio_capacitacion
+                    COALESCE(a.nombre_area, dp.area_wbe, 'N/A') as area
                  FROM detalle_programacion dp
                  JOIN programaciones pr ON dp.id_programacion = pr.id
                  LEFT JOIN personas p ON dp.id_persona = p.id

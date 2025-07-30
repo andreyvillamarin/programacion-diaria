@@ -511,6 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (casinoDateSelector) {
         const casinoDashboardContent = document.getElementById('casino-dashboard-content');
         const downloadCasinoPdfBtn = document.getElementById('download-casino-pdf-btn');
+        const casinoTitle = document.querySelector('.card-header h3');
 
         const loadCasinoData = (date) => {
             casinoDashboardContent.innerHTML = '<p class="loading-placeholder">Cargando datos de programación...</p>';
@@ -532,6 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.innerHTML = '<p>No hay datos de casino para la fecha seleccionada.</p>';
                 return;
             }
+            casinoTitle.textContent = `Programación de Casino - Sede ${reporte.nombre_sede || 'N/A'}`;
             let html = `
                 <div class="stat-cards-container">
                     <div class="stat-card-item">
@@ -566,11 +568,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tr>
                             <th>Nombre</th>
                             <th>Área</th>
-                            <th>D</th>
-                            <th>A</th>
-                            <th>C</th>
-                            <th>R1</th>
-                            <th>RC</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -580,17 +577,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     html += `
                         <tr>
                             <td>${p.nombre_persona}</td>
-                            <td>${p.nombre_area || 'N/A'}</td>
-                            <td class="check-cell">${p.desayuno ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.almuerzo ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.comida ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.refrigerio_tipo1 ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.refrigerio_capacitacion ? '✔️' : ''}</td>
+                            <td>${p.area || 'N/A'}</td>
                         </tr>
                     `;
                 });
             } else {
-                html += '<tr><td colspan="7">No hay personal programado para esta fecha.</td></tr>';
+                html += '<tr><td colspan="2">No hay personal programado para esta fecha.</td></tr>';
             }
             html += '</tbody></table>';
             container.innerHTML = html;
