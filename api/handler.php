@@ -155,35 +155,60 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
             $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
         }
 
-        function FancyTable($header, $data)
+        function TableTitle($title)
         {
+            $this->SetFont('Arial','B',13);
+            $this->SetFillColor(200, 220, 255);
+            $this->Cell(0,10,utf8_decode($title),0,1,'C',true);
+            $this->Ln(4);
+        }
+
+        function SedeTable($header, $data, $sede)
+        {
+            $this->TableTitle("Sede: " . $sede);
             $this->SetFillColor(23, 32, 42);
             $this->SetTextColor(255);
             $this->SetDrawColor(128);
             $this->SetLineWidth(.3);
             $this->SetFont('','B', 8);
 
-            $w = array(38, 38, 25, 25, 25, 8, 8, 8, 8, 8, 38, 38);
+            $w = array(40, 40, 30, 30, 10, 10, 10, 10, 10, 40, 40);
             for($i=0;$i<count($header);$i++)
                 $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
             $this->Ln();
 
-            $this->SetFillColor(224,235,255);
             $this->SetTextColor(0);
             $this->SetFont('','', 8);
 
-            $fill = false;
+            $last_zona = null;
+            $last_transporte = null;
+
             foreach($data as $row)
             {
+                if ($row['zona'] !== $last_zona) {
+                    $this->SetFont('','B', 9);
+                    $this->SetFillColor(211, 211, 211);
+                    $this->Cell(array_sum($w), 8, "Zona: " . utf8_decode($row['zona']), 1, 1, 'C', true);
+                    $last_zona = $row['zona'];
+                    $last_transporte = null; // Reset transporte
+                }
+
+                if ($row['transporte_tipo'] !== $last_transporte) {
+                    $this->SetFont('','BI', 8);
+                    $this->SetFillColor(230, 230, 230);
+                    $this->Cell(array_sum($w), 7, "Transporte: " . utf8_decode($row['transporte_tipo']), 1, 1, 'L', true);
+                    $last_transporte = $row['transporte_tipo'];
+                }
+
+                $this->SetFont('','', 8);
+                $this->SetFillColor(255, 255, 255);
+
                 $displayName = $row['nombre_completo'] ?: $row['nombre_manual'];
                 $areaWbe = $row['id_persona'] ? $row['nombre_area'] : $row['area_wbe'];
 
-                // Calculate the height of the row
-                $nb=0;
                 $data_row = array(
                     utf8_decode($displayName),
                     utf8_decode($areaWbe),
-                    utf8_decode($row['nombre_sede']),
                     utf8_decode($row['transporte_tipo']),
                     utf8_decode($row['zona']),
                     $row['desayuno'] ? 'X' : '',
@@ -194,26 +219,25 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
                     utf8_decode($row['actividad']),
                     utf8_decode($row['email_solicitante'])
                 );
+
+                $nb=0;
                 for($i=0;$i<count($data_row);$i++)
                     $nb = max($nb, $this->NbLines($w[$i], $data_row[$i]));
                 $h = 6 * $nb;
-
-                // Issue a page break first if needed
                 $this->CheckPageBreak($h);
 
-                // Draw the cells of the row
                 for($i=0;$i<count($data_row);$i++)
                 {
                     $x = $this->GetX();
                     $y = $this->GetY();
-                    $this->Rect($x, $y, $w[$i], $h, 'DF');
-                    $this->MultiCell($w[$i], 6, $data_row[$i], 0, 'C', $fill);
+                    $this->Rect($x, $y, $w[$i], $h, 'D');
+                    $this->MultiCell($w[$i], 6, $data_row[$i], 0, 'C');
                     $this->SetXY($x + $w[$i], $y);
                 }
                 $this->Ln($h);
-                $fill = !$fill;
             }
             $this->Cell(array_sum($w),0,'','T');
+            $this->Ln(10);
         }
 
         function CheckPageBreak($h)
@@ -275,17 +299,29 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
 
     try {
         $date = $_GET['date'];
-        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, p.zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY p.nombre_completo, dp.nombre_manual" );
+        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, p.zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo, dp.nombre_manual" );
         $stmt->execute([$date]);
         $programacion = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $programacion_por_sede = [];
+        foreach ($programacion as $registro) {
+            $programacion_por_sede[$registro['nombre_sede']][] = $registro;
+        }
 
         $pdf = new PDF('L', 'mm', 'A4');
         $pdf->AliasNbPages();
         $pdf->AddPage();
         $pdf->SetFont('Arial','',10);
 
-        $header = array('Nombre', 'Area | WBE', 'Sede', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad', 'Solicitante');
-        $pdf->FancyTable($header,$programacion);
+        $header = array('Nombre', 'Area | WBE', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad', 'Solicitante');
+
+        if (isset($programacion_por_sede['Betania'])) {
+            $pdf->SedeTable($header, $programacion_por_sede['Betania'], 'Betania');
+        }
+
+        if (isset($programacion_por_sede['Quimbo'])) {
+            $pdf->SedeTable($header, $programacion_por_sede['Quimbo'], 'Quimbo');
+        }
 
         $pdf->Output('D', "programacion_$date.pdf");
         exit;
