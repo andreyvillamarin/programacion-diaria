@@ -505,4 +505,170 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // --- LÓGICA PARA DASHBOARD DE CASINO ---
+    const casinoDateSelector = document.getElementById('casino-date-selector');
+    if (casinoDateSelector) {
+        const casinoDashboardContent = document.getElementById('casino-dashboard-content');
+        const downloadCasinoPdfBtn = document.getElementById('download-casino-pdf-btn');
+
+        const loadCasinoData = (date) => {
+            casinoDashboardContent.innerHTML = '<p class="loading-placeholder">Cargando datos de programación...</p>';
+            fetch(`../api/handler.php?action=get_casino_dashboard&date=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        renderCasinoDashboard(data.reporte, data.personas, casinoDashboardContent);
+                    } else {
+                        casinoDashboardContent.innerHTML = `<p class="error-message">${data.message || 'No se pudo cargar la información.'}</p>`;
+                    }
+                }).catch(() => {
+                    casinoDashboardContent.innerHTML = '<p class="error-message">Error de conexión al cargar los datos.</p>';
+                });
+        };
+
+        const renderCasinoDashboard = (reporte, personas, container) => {
+            if (!reporte) {
+                container.innerHTML = '<p>No hay datos de casino para la fecha seleccionada.</p>';
+                return;
+            }
+            let html = `
+                <div class="stat-cards-container">
+                    <div class="stat-card-item">
+                        <div class="stat-card-icon"><i class="fas fa-bread-slice"></i></div>
+                        <div class="stat-card-number">${reporte.total_desayunos || 0}</div>
+                        <div class="stat-card-label">Desayunos</div>
+                    </div>
+                    <div class="stat-card-item">
+                        <div class="stat-card-icon"><i class="fas fa-drumstick-bite"></i></div>
+                        <div class="stat-card-number">${reporte.total_almuerzos || 0}</div>
+                        <div class="stat-card-label">Almuerzos</div>
+                    </div>
+                    <div class="stat-card-item">
+                        <div class="stat-card-icon"><i class="fas fa-hotdog"></i></div>
+                        <div class="stat-card-number">${reporte.total_comidas || 0}</div>
+                        <div class="stat-card-label">Comidas</div>
+                    </div>
+                    <div class="stat-card-item">
+                        <div class="stat-card-icon"><i class="fas fa-cookie"></i></div>
+                        <div class="stat-card-number">${reporte.total_ref1 || 0}</div>
+                        <div class="stat-card-label">Refrigerio T1</div>
+                    </div>
+                    <div class="stat-card-item">
+                        <div class="stat-card-icon"><i class="fas fa-apple-alt"></i></div>
+                        <div class="stat-card-number">${reporte.total_ref_cap || 0}</div>
+                        <div class="stat-card-label">Refrigerio Cap.</div>
+                    </div>
+                </div>
+                <h4 class="mt-4">Personal Programado</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Área</th>
+                            <th>D</th>
+                            <th>A</th>
+                            <th>C</th>
+                            <th>R1</th>
+                            <th>RC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            if (personas && personas.length > 0) {
+                personas.forEach(p => {
+                    html += `
+                        <tr>
+                            <td>${p.nombre_persona}</td>
+                            <td>${p.nombre_area || 'N/A'}</td>
+                            <td class="check-cell">${p.desayuno ? '✔️' : ''}</td>
+                            <td class="check-cell">${p.almuerzo ? '✔️' : ''}</td>
+                            <td class="check-cell">${p.comida ? '✔️' : ''}</td>
+                            <td class="check-cell">${p.refrigerio_tipo1 ? '✔️' : ''}</td>
+                            <td class="check-cell">${p.refrigerio_capacitacion ? '✔️' : ''}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                html += '<tr><td colspan="7">No hay personal programado para esta fecha.</td></tr>';
+            }
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        };
+
+        casinoDateSelector.addEventListener('change', () => loadCasinoData(casinoDateSelector.value));
+        downloadCasinoPdfBtn.addEventListener('click', () => {
+            const selectedDate = casinoDateSelector.value;
+            if (selectedDate) {
+                window.open(`../api/handler.php?action=download_casino_pdf&date=${selectedDate}`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha.');
+            }
+        });
+
+        loadCasinoData(casinoDateSelector.value);
+    }
+
+    // --- LÓGICA PARA DASHBOARD DE TRANSPORTE ---
+    const transporterDateSelector = document.getElementById('transporter-date-selector');
+    if (transporterDateSelector) {
+        const transporterDashboardContent = document.getElementById('transporter-dashboard-content');
+        const downloadTransporterPdfBtn = document.getElementById('download-transporter-pdf-btn');
+
+        const loadTransporterData = (date) => {
+            transporterDashboardContent.innerHTML = '<p class="loading-placeholder">Cargando datos de programación...</p>';
+            fetch(`../api/handler.php?action=get_transporter_dashboard&date=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        renderTransporterDashboard(data.reporte, transporterDashboardContent);
+                    } else {
+                        transporterDashboardContent.innerHTML = `<p class="error-message">${data.message || 'No se pudo cargar la información.'}</p>`;
+                    }
+                }).catch(() => {
+                    transporterDashboardContent.innerHTML = '<p class="error-message">Error de conexión al cargar los datos.</p>';
+                });
+        };
+
+        const renderTransporterDashboard = (reporte, container) => {
+            if (!reporte || reporte.length === 0) {
+                container.innerHTML = '<p>No hay datos de transporte para la fecha seleccionada.</p>';
+                return;
+            }
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo de Transporte</th>
+                            <th>Sede de Destino</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            reporte.forEach(r => {
+                html += `
+                    <tr>
+                        <td>${r.nombre_completo}</td>
+                        <td>${r.transporte_tipo}</td>
+                        <td>${r.nombre_sede}</td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        };
+
+        transporterDateSelector.addEventListener('change', () => loadTransporterData(transporterDateSelector.value));
+        downloadTransporterPdfBtn.addEventListener('click', () => {
+            const selectedDate = transporterDateSelector.value;
+            if (selectedDate) {
+                window.open(`../api/handler.php?action=download_transporter_pdf&date=${selectedDate}`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha.');
+            }
+        });
+
+        loadTransporterData(transporterDateSelector.value);
+    }
 });

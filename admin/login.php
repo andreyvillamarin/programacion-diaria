@@ -37,15 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Administrativo - <?= APP_NAME ?></title>
     <link rel="stylesheet" href="../assets/css/style.css?v=<?= time() ?>">
-    <style>
-        @media (max-width: 768px) {
-            .login-container {
-                width: 95% !important;
-            }
-        }
-    </style>
 </head>
 <body class="login-page">
     <div class="login-container">

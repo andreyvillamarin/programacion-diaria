@@ -140,18 +140,20 @@ body:not(.public-body) { background-color: var(--grey-light); }
     height: 100vh;
     background: linear-gradient(45deg, var(--dark-color), #1c2833);
 }
-.login-container { 
-    background: var(--light-color); 
-    padding: 2rem; 
-    border-radius: 10px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-    width: 95%; 
-    text-align: center; 
+.login-container {
+    background: var(--light-color);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
 }
-@media (min-width: 768px) {
+
+@media (max-width: 768px) {
     .login-container {
-        width: 100%;
-        max-width: 450px;
+        width: 95%;
+        max-width: none;
     }
 }
 h1, h2, h3, h4, h5 { color: var(--dark-color); margin-bottom: 0.8rem; }
