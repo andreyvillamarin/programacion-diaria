@@ -48,9 +48,14 @@ $areas_activas = $pdo->query("SELECT id, nombre_area FROM areas WHERE activa = 1
     </div>
 
     <div class="card">
-        <div class="card-header"><h3>Listado de Personal</h3></div>
+        <div class="card-header">
+            <h3>Listado de Personal</h3>
+            <div class="form-group">
+                <input type="text" id="person-search" placeholder="Buscar por nombre...">
+            </div>
+        </div>
         <div class="card-body">
-            <table class="data-table">
+            <table class="data-table" id="personas-table">
                 <thead><tr><th>Nombre Completo</th><th>Área</th><th>Estado</th><th>Acciones</th></tr></thead>
                 <tbody>
                     <?php foreach ($personas as $persona): ?>

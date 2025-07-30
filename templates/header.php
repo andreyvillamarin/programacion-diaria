@@ -12,7 +12,11 @@ if (!isset($_SESSION['user_id']) && basename($_SERVER['PHP_SELF']) != 'login.php
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? $page_title . ' - ' : '' ?><?= APP_NAME ?></title>
     <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> </head>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        const APP_URL = '<?= APP_URL ?>';
+    </script>
+</head>
 <body>
     <div class="admin-wrapper">
         <nav class="admin-nav">

@@ -13,6 +13,14 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha = $_POST['fecha_programacion'];
     $area_id = $_POST['area'];
 
+    $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
+    $check_stmt->execute([$fecha]);
+    if ($check_stmt->fetchColumn() > 0) {
+        $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
+        echo json_encode($response);
+        exit;
+    }
+
     if (!$fecha || !$area_id) {
         $response['message'] = 'Faltan datos del solicitante. Por favor complete el formulario.';
         echo json_encode($response);
@@ -75,6 +83,48 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         $pdo->commit();
+
+        if ($email) {
+            $programacion_cards = '';
+            if (trim(mb_strtolower($area_nombre, 'UTF-8')) == 'otras áreas') {
+                $details = $_POST['other'];
+                $programacion_cards .= "<div class='card'><h3>{$details['nombre_manual']}</h3><ul>";
+                $programacion_cards .= "<li><strong>Área | WBE:</strong> {$details['area_wbe']}</li>";
+                $programacion_cards .= "<li><strong>Actividad:</strong> {$details['actividad']}</li>";
+                $programacion_cards .= "</ul></div>";
+            } else {
+                $people_data = $_POST['people'] ?? [];
+                foreach ($people_data as $person_id => $details) {
+                    if (!empty($details['desayuno']) || !empty($details['almuerzo']) || !empty($details['comida']) || !empty($details['refrigerio_tipo1']) || !empty($details['refrigerio_capacitacion']) || !empty($details['transporte_tipo'])) {
+                        $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
+                        $person_name_stmt->execute([$person_id]);
+                        $person_name = $person_name_stmt->fetchColumn();
+
+                        $sede_name = '';
+                        if (!empty($details['id_sede'])) {
+                            $sede_name_stmt = $pdo->prepare("SELECT nombre_sede FROM sedes WHERE id = ?");
+                            $sede_name_stmt->execute([$details['id_sede']]);
+                            $sede_name = $sede_name_stmt->fetchColumn();
+                        }
+
+                        $programacion_cards .= "<div class='card'><h3>{$person_name}</h3><ul>";
+                        if (!empty($sede_name)) $programacion_cards .= "<li>✔️ Sede: {$sede_name}</li>";
+                        if (isset($details['desayuno'])) $programacion_cards .= "<li>✔️ Desayuno</li>";
+                        if (isset($details['almuerzo'])) $programacion_cards .= "<li>✔️ Almuerzo</li>";
+                        if (isset($details['comida'])) $programacion_cards .= "<li>✔️ Comida</li>";
+                        if (isset($details['refrigerio_tipo1'])) $programacion_cards .= "<li>✔️ Refrigerio Tipo 1</li>";
+                        if (isset($details['refrigerio_capacitacion'])) $programacion_cards .= "<li>✔️ Refrigerio Capacitación</li>";
+                        if (!empty($details['transporte_tipo'])) $programacion_cards .= "<li>✔️ Transporte: {$details['transporte_tipo']}</li>";
+                        $programacion_cards .= "</ul></div>";
+                    }
+                }
+            }
+
+            $html_body = file_get_contents('../templates/email/confirmacion_usuario.html');
+            $html_body = str_replace(['{{fecha}}', '{{programacion_cards}}'], [$fecha, $programacion_cards], $html_body);
+            send_brevo_email([['email' => $email]], 'Confirmación de Programación', $html_body, $pdo);
+        }
+
         $response = ['success' => true, 'message' => '¡Programación enviada con éxito!'];
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -86,55 +136,160 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($action === 'download_pdf' && isset($_GET['date'])) {
     require_once '../includes/lib/fpdf/fpdf.php';
 
+    class PDF extends FPDF
+    {
+        function Header()
+        {
+            global $date;
+            $this->SetFont('Arial','B',15);
+            $this->SetFillColor(23, 32, 42);
+            $this->SetTextColor(255,255,255);
+            $this->Cell(0,15,utf8_decode('Programación para el día: ' . $date),0,1,'C',true);
+            $this->Ln(5);
+        }
+
+        function Footer()
+        {
+            $this->SetY(-15);
+            $this->SetFont('Arial','I',8);
+            $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
+        }
+
+        function FancyTable($header, $data)
+        {
+            $this->SetFillColor(23, 32, 42);
+            $this->SetTextColor(255);
+            $this->SetDrawColor(128);
+            $this->SetLineWidth(.3);
+            $this->SetFont('','B');
+
+            $w = array(40, 40, 40, 25, 10, 10, 10, 10, 10, 30, 40);
+            for($i=0;$i<count($header);$i++)
+                $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
+            $this->Ln();
+
+            $this->SetFillColor(224,235,255);
+            $this->SetTextColor(0);
+            $this->SetFont('');
+
+            $fill = false;
+            foreach($data as $row)
+            {
+                $displayName = $row['nombre_completo'] ?: $row['nombre_manual'];
+                $areaWbe = $row['id_persona'] ? $row['nombre_area'] : $row['area_wbe'];
+
+                // Calculate the height of the row
+                $nb=0;
+                $data_row = array(
+                    utf8_decode($displayName),
+                    utf8_decode($areaWbe),
+                    utf8_decode($row['actividad']),
+                    utf8_decode($row['nombre_sede']),
+                    $row['desayuno'] ? 'X' : '',
+                    $row['almuerzo'] ? 'X' : '',
+                    $row['comida'] ? 'X' : '',
+                    $row['refrigerio_tipo1'] ? 'X' : '',
+                    $row['refrigerio_capacitacion'] ? 'X' : '',
+                    utf8_decode($row['transporte_tipo']),
+                    utf8_decode($row['email_solicitante'])
+                );
+                for($i=0;$i<count($data_row);$i++)
+                    $nb = max($nb, $this->NbLines($w[$i], $data_row[$i]));
+                $h = 6 * $nb;
+
+                // Issue a page break first if needed
+                $this->CheckPageBreak($h);
+
+                // Draw the cells of the row
+                for($i=0;$i<count($data_row);$i++)
+                {
+                    $x = $this->GetX();
+                    $y = $this->GetY();
+                    $this->Rect($x, $y, $w[$i], $h, 'DF');
+                    $this->MultiCell($w[$i], 6, $data_row[$i], 0, 'C', $fill);
+                    $this->SetXY($x + $w[$i], $y);
+                }
+                $this->Ln($h);
+                $fill = !$fill;
+            }
+            $this->Cell(array_sum($w),0,'','T');
+        }
+
+        function CheckPageBreak($h)
+        {
+            if($this->GetY()+$h>$this->PageBreakTrigger)
+                $this->AddPage($this->CurOrientation);
+        }
+
+        function NbLines($w, $txt)
+        {
+            $cw = &$this->CurrentFont['cw'];
+            if($w==0)
+                $w = $this->w-$this->rMargin-$this->x;
+            $wmax = ($w-2*$this->cMargin)*1000/$this->FontSize;
+            $s = str_replace("\r",'',$txt);
+            $nb = strlen($s);
+            if($nb>0 && $s[$nb-1]=="\n")
+                $nb--;
+            $sep = -1;
+            $i = 0;
+            $j = 0;
+            $l = 0;
+            $nl = 1;
+            while($i<$nb)
+            {
+                $c = $s[$i];
+                if($c=="\n")
+                {
+                    $i++;
+                    $sep = -1;
+                    $j = $i;
+                    $l = 0;
+                    $nl++;
+                    continue;
+                }
+                if($c==' ')
+                    $sep = $i;
+                $l += $cw[$c];
+                if($l>$wmax)
+                {
+                    if($sep==-1)
+                    {
+                        if($i==$j)
+                            $i++;
+                    }
+                    else
+                        $i = $sep+1;
+                    $sep = -1;
+                    $j = $i;
+                    $l = 0;
+                    $nl++;
+                }
+                else
+                    $i++;
+            }
+            return $nl;
+        }
+    }
+
     try {
         $date = $_GET['date'];
         $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
         $stmt->execute([$date]);
         $programacion = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf = new PDF('L', 'mm', 'A4');
+        $pdf->AliasNbPages();
         $pdf->AddPage();
-        $pdf->SetFont('Arial','B',16);
-        $pdf->Cell(0,10, "Programacion para el dia: " . $date, 0, 1, 'C');
+        $pdf->SetFont('Arial','',10);
 
-        $pdf->SetFont('Arial','B',8);
-        $pdf->Cell(40,10,'Persona',1);
-        $pdf->Cell(40,10,'Area | WBE',1);
-        $pdf->Cell(40,10,'Actividad',1);
-        $pdf->Cell(25,10,'Sede',1);
-        $pdf->Cell(10,10,'D',1);
-        $pdf->Cell(10,10,'A',1);
-        $pdf->Cell(10,10,'C',1);
-        $pdf->Cell(10,10,'R1',1);
-        $pdf->Cell(10,10,'RC',1);
-        $pdf->Cell(30,10,'Transporte',1);
-        $pdf->Cell(40,10,'Solicitante',1);
-        $pdf->Ln();
-
-        $pdf->SetFont('Arial','',8);
-        foreach($programacion as $row) {
-            $displayName = $row['nombre_completo'] ?: $row['nombre_manual'];
-            $areaWbe = $row['id_persona'] ? $row['nombre_area'] : $row['area_wbe'];
-
-            $pdf->Cell(40,10,utf8_decode($displayName),1);
-            $pdf->Cell(40,10,utf8_decode($areaWbe),1);
-            $pdf->Cell(40,10,utf8_decode($row['actividad']),1);
-            $pdf->Cell(25,10,utf8_decode($row['nombre_sede']),1);
-            $pdf->Cell(10,10,$row['desayuno'] ? 'X' : '',1, 0, 'C');
-            $pdf->Cell(10,10,$row['almuerzo'] ? 'X' : '',1, 0, 'C');
-            $pdf->Cell(10,10,$row['comida'] ? 'X' : '',1, 0, 'C');
-            $pdf->Cell(10,10,$row['refrigerio_tipo1'] ? 'X' : '',1, 0, 'C');
-            $pdf->Cell(10,10,$row['refrigerio_capacitacion'] ? 'X' : '',1, 0, 'C');
-            $pdf->Cell(30,10,utf8_decode($row['transporte_tipo']),1);
-            $pdf->Cell(40,10,utf8_decode($row['email_solicitante']),1);
-            $pdf->Ln();
-        }
+        $header = array('Persona', 'Area | WBE', 'Actividad', 'Sede', 'D', 'A', 'C', 'R1', 'RC', 'Transporte', 'Solicitante');
+        $pdf->FancyTable($header,$programacion);
 
         $pdf->Output('D', "programacion_$date.pdf");
         exit;
 
     } catch (PDOException $e) {
-        // Manejar errores de base de datos
         header('HTTP/1.1 500 Internal Server Error');
         echo "Error de base de datos: " . $e->getMessage();
         exit;
@@ -145,12 +300,293 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
 //======================================================================
 // ACCIONES DEL PANEL DE ADMINISTRACIÓN (SOLO ADMIN)
 //======================================================================
+if (isset($_SESSION['user_rol'])) {
+
+    if ($action === 'get_casino_dashboard' && isset($_GET['date'])) {
+        try {
+            $date = $_GET['date'];
+            $sede_id = $_SESSION['user_sede'] ?? 0;
+            $stmt = $pdo->prepare(
+                "SELECT 
+                    s.nombre_sede,
+                    SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos,
+                    SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1,
+                    SUM(dp.refrigerio_capacitacion) as total_ref_cap
+                 FROM detalle_programacion dp
+                 JOIN programaciones pr ON dp.id_programacion = pr.id
+                 JOIN sedes s ON dp.id_sede = s.id
+                 WHERE pr.fecha_programacion = ? AND dp.id_sede = ?
+                 GROUP BY dp.id_sede"
+            );
+            $stmt->execute([$date, $sede_id]);
+            $reporte = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $personas_stmt = $pdo->prepare(
+                "SELECT 
+                    COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, 
+                    a.nombre_area, 
+                    dp.desayuno, dp.almuerzo, dp.comida, 
+                    dp.refrigerio_tipo1, dp.refrigerio_capacitacion
+                 FROM detalle_programacion dp
+                 JOIN programaciones pr ON dp.id_programacion = pr.id
+                 LEFT JOIN personas p ON dp.id_persona = p.id
+                 LEFT JOIN areas a ON p.id_area = a.id
+                 WHERE pr.fecha_programacion = ? AND dp.id_sede = ? 
+                 AND (dp.desayuno=1 OR dp.almuerzo=1 OR dp.comida=1 OR dp.refrigerio_tipo1=1 OR dp.refrigerio_capacitacion=1)
+                 ORDER BY nombre_persona"
+            );
+            $personas_stmt->execute([$date, $sede_id]);
+            $personas = $personas_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $response = ['success' => true, 'reporte' => $reporte, 'personas' => $personas];
+        } catch (PDOException $e) {
+            $response = ['success' => false, 'message' => 'Error de BD: ' . $e->getMessage()];
+        }
+        echo json_encode($response);
+        exit;
+    }
+
+    if ($action === 'download_casino_pdf' && isset($_GET['date'])) {
+        require_once '../includes/lib/fpdf/fpdf.php';
+        
+        try {
+            $date = $_GET['date'];
+            $sede_id = $_SESSION['user_sede'] ?? 0;
+            $sede_id = $_SESSION['user_sede'] ?? 0;
+
+            // Obtener el nombre de la sede
+            $sede_stmt = $pdo->prepare("SELECT nombre_sede FROM sedes WHERE id = ?");
+            $sede_stmt->execute([$sede_id]);
+            $nombre_sede = $sede_stmt->fetchColumn();
+
+            // Obtener el resumen de comidas
+            $resumen_stmt = $pdo->prepare(
+                "SELECT 
+                    SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos,
+                    SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1,
+                    SUM(dp.refrigerio_capacitacion) as total_ref_cap
+                 FROM detalle_programacion dp
+                 JOIN programaciones pr ON dp.id_programacion = pr.id
+                 WHERE pr.fecha_programacion = ? AND dp.id_sede = ?"
+            );
+            $resumen_stmt->execute([$date, $sede_id]);
+            $resumen = $resumen_stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Obtener el listado de personas
+            $personas_stmt = $pdo->prepare(
+                "SELECT 
+                    COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, 
+                    COALESCE(a.nombre_area, dp.area_wbe, 'N/A') as area,
+                    dp.desayuno, dp.almuerzo, dp.comida, 
+                    dp.refrigerio_tipo1, dp.refrigerio_capacitacion
+                 FROM detalle_programacion dp
+                 JOIN programaciones pr ON dp.id_programacion = pr.id
+                 LEFT JOIN personas p ON dp.id_persona = p.id
+                 LEFT JOIN areas a ON p.id_area = a.id
+                 WHERE pr.fecha_programacion = ? AND dp.id_sede = ?
+                 AND (dp.desayuno=1 OR dp.almuerzo=1 OR dp.comida=1 OR dp.refrigerio_tipo1=1 OR dp.refrigerio_capacitacion=1)
+                 ORDER BY nombre_persona"
+            );
+            $personas_stmt->execute([$date, $sede_id]);
+            $personas = $personas_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $pdf = new FPDF('P', 'mm', 'A4');
+            $pdf->AddPage();
+            $pdf->SetFont('Arial','B',16);
+            $pdf->Cell(0,10, utf8_decode("Reporte de Casino - Sede: $nombre_sede"), 0, 1, 'C');
+            $pdf->SetFont('Arial','',12);
+            $pdf->Cell(0,10, "Fecha: " . $date, 0, 1, 'C');
+            $pdf->Ln(10);
+
+            // Tabla de Resumen
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(95,10,'Tipo de Comida',1,0,'C');
+            $pdf->Cell(95,10,'Cantidad',1,0,'C');
+            $pdf->Ln();
+            $pdf->SetFont('Arial','',10);
+            $data = [
+                'Desayunos' => $resumen['total_desayunos'],
+                'Almuerzos' => $resumen['total_almuerzos'],
+                'Comidas' => $resumen['total_comidas'],
+                'Refrigerio Tipo 1' => $resumen['total_ref1'],
+                'Refrigerio Capacitacion' => $resumen['total_ref_cap']
+            ];
+            foreach($data as $label => $value){
+                $pdf->Cell(95,8,utf8_decode($label),1);
+                $pdf->Cell(95,8,$value,1,0,'C');
+                $pdf->Ln();
+            }
+            $pdf->Ln(10);
+
+            // Tabla de Personal
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(0,10,'Listado Detallado de Personal',0,1,'C');
+            $pdf->Ln(5);
+
+            $pdf->SetFont('Arial','B',10);
+            $pdf->Cell(70, 7, 'Nombre', 1, 0, 'C');
+            $pdf->Cell(50, 7, utf8_decode('Área'), 1, 0, 'C');
+            $pdf->Cell(12, 7, 'D', 1, 0, 'C');
+            $pdf->Cell(12, 7, 'A', 1, 0, 'C');
+            $pdf->Cell(12, 7, 'C', 1, 0, 'C');
+            $pdf->Cell(12, 7, 'R1', 1, 0, 'C');
+            $pdf->Cell(12, 7, 'RC', 1, 0, 'C');
+            $pdf->Ln();
+
+            $pdf->SetFont('Arial','',9);
+            foreach($personas as $persona){
+                $pdf->Cell(70, 6, utf8_decode($persona['nombre_persona']), 1);
+                $pdf->Cell(50, 6, utf8_decode($persona['area']), 1);
+                $pdf->Cell(12, 6, $persona['desayuno'] ? 'X' : '', 1, 0, 'C');
+                $pdf->Cell(12, 6, $persona['almuerzo'] ? 'X' : '', 1, 0, 'C');
+                $pdf->Cell(12, 6, $persona['comida'] ? 'X' : '', 1, 0, 'C');
+                $pdf->Cell(12, 6, $persona['refrigerio_tipo1'] ? 'X' : '', 1, 0, 'C');
+                $pdf->Cell(12, 6, $persona['refrigerio_capacitacion'] ? 'X' : '', 1, 0, 'C');
+                $pdf->Ln();
+            }
+            
+            $pdf->Output('D', "reporte_casino_{$nombre_sede}_{$date}.pdf");
+            exit;
+
+        } catch (PDOException $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            echo "Error de base de datos: " . $e->getMessage();
+            exit;
+        }
+    }
+
+    if ($action === 'get_transporter_dashboard' && isset($_GET['date'])) {
+        try {
+            $date = $_GET['date'];
+            $stmt = $pdo->prepare(
+                "SELECT p.nombre_completo, s.nombre_sede, dp.transporte_tipo
+                 FROM detalle_programacion dp
+                 JOIN programaciones pr ON dp.id_programacion = pr.id
+                 JOIN personas p ON dp.id_persona = p.id
+                 JOIN sedes s ON dp.id_sede = s.id
+                 WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere'
+                 ORDER BY s.nombre_sede, p.nombre_completo"
+            );
+            $stmt->execute([$date]);
+            $reporte = $stmt->fetchAll();
+            $response = ['success' => true, 'reporte' => $reporte];
+        } catch (PDOException $e) {
+            $response = ['success' => false, 'message' => 'Error de BD: ' . $e->getMessage()];
+        }
+        echo json_encode($response);
+        exit;
+    }
+
+    if ($action === 'download_transporter_pdf' && isset($_GET['date'])) {
+        require_once '../includes/lib/fpdf/fpdf.php';
+        
+        try {
+            $date = $_GET['date'];
+            $stmt = $pdo->prepare(
+                "SELECT p.nombre_completo, s.nombre_sede, dp.transporte_tipo
+                 FROM detalle_programacion dp
+                 JOIN programaciones pr ON dp.id_programacion = pr.id
+                 JOIN personas p ON dp.id_persona = p.id
+                 JOIN sedes s ON dp.id_sede = s.id
+                 WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere'
+                 ORDER BY s.nombre_sede, p.nombre_completo"
+            );
+            $stmt->execute([$date]);
+            $reporte = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $pdf = new FPDF('P', 'mm', 'A4');
+            $pdf->AddPage();
+            $pdf->SetFont('Arial','B',16);
+            $pdf->Cell(0,10, "Rutas de Transporte - " . $date, 0, 1, 'C');
+            
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(80,10,'Persona',1);
+            $pdf->Cell(50,10,'Tipo de Ruta',1);
+            $pdf->Cell(60,10,'Sede Destino',1);
+            $pdf->Ln();
+
+            $pdf->SetFont('Arial','',10);
+            foreach($reporte as $row) {
+                $pdf->Cell(80,10,utf8_decode($row['nombre_completo']),1);
+                $pdf->Cell(50,10,utf8_decode($row['transporte_tipo']),1);
+                $pdf->Cell(60,10,utf8_decode($row['nombre_sede']),1);
+                $pdf->Ln();
+            }
+
+            $pdf->Output('D', "rutas_transporte_$date.pdf");
+            exit;
+
+        } catch (PDOException $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            echo "Error de base de datos: " . $e->getMessage();
+            exit;
+        }
+    }
+}
+
+
 if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
+
+    if ($action === 'set_selected_date' && isset($_POST['date'])) {
+        $_SESSION['selected_date'] = $_POST['date'];
+        $response = ['success' => true];
+        echo json_encode($response);
+        exit;
+    }
+
+    if ($action === 'download_analytics_pdf' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_once '../includes/lib/fpdf/fpdf.php';
+
+        $charts = json_decode($_POST['charts']);
+        $date_range = $_POST['date_range'];
+
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',16);
+        $pdf->Cell(0,10,utf8_decode('Reporte de Analíticas'),0,1,'C');
+        $pdf->SetFont('Arial','',12);
+        $pdf->Cell(0,10,$date_range,0,1,'C');
+        $pdf->Ln(10);
+
+        foreach ($charts as $chart) {
+            $img = str_replace('data:image/png;base64,', '', $chart->image);
+            $img = str_replace(' ', '+', $img);
+            $data = base64_decode($img);
+            $file = 'tmp/' . uniqid() . '.png';
+            file_put_contents($file, $data);
+            
+            $pdf->SetFont('Arial','B',14);
+            $pdf->Cell(0,10,utf8_decode($chart->title),0,1,'C');
+            if ($chart->title === 'Total de Personas') {
+                $pdf->Image($file, 10, null, 277);
+            } else {
+                $pdf->Image($file, 75, null, 120);
+            }
+            $pdf->Ln(5);
+            unlink($file);
+
+            if (next($charts)) {
+                $pdf->AddPage();
+            }
+        }
+
+        $pdf->Output('D', 'reporte_analiticas.pdf');
+        exit;
+    }
     
     if ($action === 'add_manual_entry' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = filter_input(INPUT_POST, 'email_solicitante', FILTER_VALIDATE_EMAIL);
         $fecha = $_POST['fecha_programacion'];
         $area_id = $_POST['area'];
+
+        $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
+        $check_stmt->execute([$fecha]);
+        if ($check_stmt->fetchColumn() > 0) {
+            $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
+            echo json_encode($response);
+            exit;
+        }
+
         if (!$fecha || !$area_id) { $response['message'] = 'Faltan datos generales.'; }
         else {
             try {
@@ -209,10 +645,15 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
     if ($action === 'get_admin_dashboard' && isset($_GET['date'])) {
         try {
             $date = $_GET['date'];
-            $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
+            $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY p.nombre_completo, dp.nombre_manual" );
             $stmt->execute([$date]);
             $programacion = $stmt->fetchAll();
-            $response = ['success' => true, 'programacion' => $programacion];
+
+            $finalized_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
+            $finalized_stmt->execute([$date]);
+            $is_finalized = $finalized_stmt->fetchColumn() > 0;
+
+            $response = ['success' => true, 'programacion' => $programacion, 'is_finalized' => $is_finalized];
         } catch (PDOException $e) { $response = ['success' => false, 'message' => 'Error de BD: ' . $e->getMessage()]; }
     }
 
@@ -245,9 +686,9 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
         try {
             $date = $_POST['date'];
             $pdo->beginTransaction();
-            $chef_reports_stmt = $pdo->prepare("SELECT dp.id_sede, s.nombre_sede, SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos, SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1, SUM(dp.refrigerio_capacitacion) as total_ref_cap, GROUP_CONCAT(COALESCE(p.nombre_completo, dp.nombre_manual) SEPARATOR ', ') as personas FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id LEFT JOIN personas p ON dp.id_persona = p.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' GROUP BY dp.id_sede");
+            $chef_reports_stmt = $pdo->prepare("SELECT dp.id_sede, s.nombre_sede, SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos, SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1, SUM(dp.refrigerio_capacitacion) as total_ref_cap FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' GROUP BY dp.id_sede");
             $chef_reports_stmt->execute([$date]);
-            $chef_reports = $chef_reports_stmt->fetchAll(PDO::FETCH_GROUP);
+            $chef_reports = $chef_reports_stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
             $transporter_report_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, s.nombre_sede, dp.transporte_tipo FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id LEFT JOIN personas p ON dp.id_persona = p.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' AND dp.transporte_tipo != 'No requiere' ORDER BY s.nombre_sede, nombre_persona");
             $transporter_report_stmt->execute([$date]);
             $transporter_report = $transporter_report_stmt->fetchAll();
@@ -256,17 +697,62 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
             foreach ($chefs as $chef) {
                 if (isset($chef_reports[$chef['id_sede']])) {
                     $report_data = $chef_reports[$chef['id_sede']][0];
-                    $html_body = "<h1>Reporte de Alimentación para {$report_data['nombre_sede']} - Fecha: {$date}</h1><h3>Resumen de Cantidades:</h3><ul><li>Desayunos: <strong>{$report_data['total_desayunos']}</strong></li><li>Almuerzos: <strong>{$report_data['total_almuerzos']}</strong></li><li>Comidas: <strong>{$report_data['total_comidas']}</strong></li></ul><h3>Listado de Personal:</h3><p>{$report_data['personas']}</p>";
+                    
+                    $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND dp.id_sede = ? AND pr.estado = 'pendiente'");
+                    $personas_stmt->execute([$date, $chef['id_sede']]);
+                    $personas = $personas_stmt->fetchAll(PDO::FETCH_COLUMN);
+                    $personas_list = '<ul><li>' . implode('</li><li>', $personas) . '</li></ul>';
+
+                    $html_body = file_get_contents('../templates/email/reporte_casino.html');
+                    $html_body = str_replace(
+                        ['{{sede_nombre}}', '{{fecha}}', '{{total_desayunos}}', '{{total_almuerzos}}', '{{total_comidas}}', '{{personas}}'],
+                        [$report_data['nombre_sede'], $date, $report_data['total_desayunos'], $report_data['total_almuerzos'], $report_data['total_comidas'], $personas_list],
+                        $html_body
+                    );
                     send_brevo_email([['email' => $chef['email']]], "Reporte de Alimentación {$date}", $html_body, $pdo);
                 }
             }
             if (!empty($transporter_report) && !empty($transporters)) {
-                $html_body = "<h1>Reporte de Transporte - Fecha: {$date}</h1><table border='1' cellpadding='5' cellspacing='0'><thead><tr><th>Persona</th><th>Tipo de Ruta</th><th>Sede Destino</th></tr></thead><tbody>";
-                foreach($transporter_report as $row) { $html_body .= "<tr><td>{$row['nombre_persona']}</td><td>{$row['transporte_tipo']}</td><td>{$row['nombre_sede']}</td></tr>"; }
-                $html_body .= "</tbody></table>";
+                $transport_rows = '';
+                foreach($transporter_report as $row) {
+                    $transport_rows .= "<tr><td>{$row['nombre_persona']}</td><td>{$row['transporte_tipo']}</td><td>{$row['nombre_sede']}</td></tr>";
+                }
+                $html_body = file_get_contents('../templates/email/reporte_transporte.html');
+                $html_body = str_replace(['{{fecha}}', '{{transport_rows}}'], [$date, $transport_rows], $html_body);
                 $transporter_emails = array_map(fn($t) => ['email' => $t['email']], $transporters);
                 send_brevo_email($transporter_emails, "Reporte de Transporte {$date}", $html_body, $pdo);
             }
+            $admin_emails = $pdo->query("SELECT email FROM usuarios WHERE id_rol = 1 AND activo = 1")->fetchAll(PDO::FETCH_COLUMN);
+            if (!empty($admin_emails)) {
+                $programacion_stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
+                $programacion_stmt->execute([$date]);
+                $programacion_completa = $programacion_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $programacion_rows = '';
+                foreach($programacion_completa as $row) {
+                    $displayName = $row['nombre_completo'] ?: $row['nombre_manual'];
+                    $areaWbe = $row['id_persona'] ? $row['nombre_area'] : $row['area_wbe'];
+                    $programacion_rows .= "<tr>
+                        <td>{$displayName}</td>
+                        <td>{$areaWbe}</td>
+                        <td>{$row['actividad']}</td>
+                        <td>{$row['nombre_sede']}</td>
+                        <td>".($row['desayuno'] ? 'X' : '')."</td>
+                        <td>".($row['almuerzo'] ? 'X' : '')."</td>
+                        <td>".($row['comida'] ? 'X' : '')."</td>
+                        <td>".($row['refrigerio_tipo1'] ? 'X' : '')."</td>
+                        <td>".($row['refrigerio_capacitacion'] ? 'X' : '')."</td>
+                        <td>{$row['transporte_tipo']}</td>
+                        <td>{$row['email_solicitante']}</td>
+                    </tr>";
+                }
+
+                $html_body = file_get_contents('../templates/email/reporte_admin.html');
+                $html_body = str_replace(['{{fecha}}', '{{programacion_rows}}'], [$date, $programacion_rows], $html_body);
+                $admin_emails_brevo = array_map(fn($e) => ['email' => $e], $admin_emails);
+                send_brevo_email($admin_emails_brevo, "Consolidado de Programación {$date}", $html_body, $pdo);
+            }
+
             $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ? AND estado = 'pendiente'");
             $update_stmt->execute([$date]);
             $pdo->commit();
@@ -281,7 +767,27 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
             $food_stmt->execute([$start, $end]); $food_data = $food_stmt->fetch(PDO::FETCH_NUM);
             $transport_stmt = $pdo->prepare("SELECT transporte_tipo, COUNT(*) as total FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion BETWEEN ? AND ? GROUP BY transporte_tipo");
             $transport_stmt->execute([$start, $end]); $transport_data = $transport_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-            $response = ['success' => true, 'food_data' => $food_data, 'transport_data' => $transport_data];
+            
+            $sedes_stmt = $pdo->prepare("SELECT s.nombre_sede, COUNT(dp.id) as count FROM sedes s LEFT JOIN detalle_programacion dp ON s.id = dp.id_sede JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion BETWEEN ? AND ? GROUP BY s.nombre_sede");
+            $sedes_stmt->execute([$start, $end]);
+            $sedes_data = $sedes_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $areas_stmt = $pdo->prepare("SELECT a.nombre_area, COUNT(dp.id) as count FROM areas a LEFT JOIN personas p ON a.id = p.id_area LEFT JOIN detalle_programacion dp ON p.id = dp.id_persona JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion BETWEEN ? AND ? GROUP BY a.nombre_area");
+            $areas_stmt->execute([$start, $end]);
+            $areas_data = $areas_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre, COUNT(*) as count FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion BETWEEN ? AND ? GROUP BY nombre ORDER BY count DESC LIMIT 10");
+            $personas_stmt->execute([$start, $end]);
+            $personas_data = $personas_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $response = [
+                'success' => true, 
+                'food_data' => $food_data, 
+                'transport_data' => $transport_data,
+                'sedes_data' => $sedes_data,
+                'areas_data' => $areas_data,
+                'personas_data' => $personas_data
+            ];
         } catch (PDOException $e) { $response = ['success' => false, 'message' => 'Error de BD: ' . $e->getMessage()]; }
     }
 }

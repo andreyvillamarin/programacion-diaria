@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Programación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #02b3e4; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #02b3e4; }
+        .card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 20px; }
+        .card h3 { margin-top: 0; color: #333; }
+        .card ul { list-style: none; padding: 0; }
+        .card li { margin-bottom: 10px; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x2728; ¡Programación Recibida!</h1>
+        </div>
+        <div class="content">
+            <h2>Hola,</h2>
+            <p>Hemos recibido correctamente tu solicitud de programación para el día <strong>{{fecha}}</strong>. A continuación, te mostramos el resumen de tu solicitud:</p>
+            
+            {{programacion_cards}}
+
+            <p>Un administrador la revisará pronto. Gracias por usar nuestro servicio.</p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>

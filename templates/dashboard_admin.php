@@ -3,7 +3,7 @@
 <div class="dashboard-controls">
     <div class="form-group">
         <label for="date-selector">Seleccionar fecha de programación:</label>
-        <input type="date" id="date-selector" value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+        <input type="date" id="date-selector" value="<?= $_SESSION['selected_date'] ?? date('Y-m-d', strtotime('+1 day')) ?>">
     </div>
     <div class="control-buttons">
         <button id="add-manual-btn" class="btn btn-secondary"><i class="fas fa-plus"></i> Añadir Registro Manual</button>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consolidado de Programación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #4CAF50; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #4CAF50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #5cb85c; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F4CB; Consolidado de Programación</h1>
+        </div>
+        <div class="content">
+            <h2>{{fecha}}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Persona</th>
+                        <th>Área | WBE</th>
+                        <th>Actividad</th>
+                        <th>Sede</th>
+                        <th>D</th>
+                        <th>A</th>
+                        <th>C</th>
+                        <th>R1</th>
+                        <th>RC</th>
+                        <th>Transporte</th>
+                        <th>Solicitante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{programacion_rows}}
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -78,6 +78,7 @@
             </form>
         <?php else: ?>
             <div class="form-closed-message">
+                <div class="alert-icon">&#9888;</div>
                 <h3>Formulario Cerrado</h3>
                 <p><?= htmlspecialchars(get_setting('mensaje_formulario_cerrado', $pdo)) ?></p>
                 <p>Horario de atención: de <?= htmlspecialchars(get_setting('horario_apertura', $pdo)) ?> a <?= htmlspecialchars(get_setting('horario_cierre', $pdo)) ?></p>

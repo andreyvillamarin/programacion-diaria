@@ -95,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dateSelector) {
         const dashboardContent = document.getElementById('dashboard-content');
         const finalizeBtn = document.getElementById('finalize-day-btn');
-        const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
         const loadDashboardData = (date) => {
             dashboardContent.innerHTML = '<p class="loading-placeholder">Cargando datos de programación...</p>';
@@ -212,11 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         finalizeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Finalizar y Enviar Reportes';
                     });
             }
-        });
-
-        downloadPdfBtn.addEventListener('click', () => {
-            const date = dateSelector.value;
-            window.open(`../api/handler.php?action=download_pdf&date=${date}`, '_blank');
         });
 
         loadDashboardData(dateSelector.value);
@@ -349,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA PARA PÁGINA DE ANALÍTICAS ---
     const generateReportBtn = document.getElementById('generate-report-btn');
     if (generateReportBtn) {
-        let foodChart, transportChart;
+        let foodChart, transportChart, sedesChart, areasChart, personasChart;
 
         const generateCharts = () => {
             const startDate = document.getElementById('start-date').value;
@@ -360,6 +354,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.success) {
                         renderFoodChart(data.food_data);
                         renderTransportChart(data.transport_data);
+                        renderSedesChart(data.sedes_data);
+                        renderAreasChart(data.areas_data);
+                        renderPersonasChart(data.personas_data);
                     }
                 });
         };
@@ -373,19 +370,107 @@ document.addEventListener('DOMContentLoaded', () => {
                     labels: ['Desayuno', 'Almuerzo', 'Comida', 'Refrig. T1', 'Refrig. Cap.'],
                     datasets: [{ label: 'Total Consumido', data: data, backgroundColor: ['#3e95cd', '#8e5ea2', '#3cba9f', '#e8c3b9', '#c45850'] }]
                 },
-                options: { responsive: true, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         };
         
         const renderTransportChart = (data) => {
             const ctx = document.getElementById('transport-chart').getContext('2d');
             if (transportChart) transportChart.destroy();
+            const labels = Object.keys(data).map(key => `${key} (${data[key]})`);
             transportChart = new Chart(ctx, {
                 type: 'pie',
-                data: { labels: Object.keys(data), datasets: [{ data: Object.values(data) }] },
-                options: { responsive: true }
+                data: { labels: labels, datasets: [{ data: Object.values(data) }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         };
+
+        const renderSedesChart = (data) => {
+            const ctx = document.getElementById('sedes-chart').getContext('2d');
+            if (sedesChart) sedesChart.destroy();
+            const labels = Object.keys(data).map(key => `${key} (${data[key]})`);
+            sedesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: Object.values(data) }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        };
+
+        const renderAreasChart = (data) => {
+            const ctx = document.getElementById('areas-chart').getContext('2d');
+            if (areasChart) areasChart.destroy();
+            areasChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{ label: 'Personas por Área', data: Object.values(data), backgroundColor: '#36a2eb' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+            });
+        };
+
+        const renderPersonasChart = (data) => {
+            const ctx = document.getElementById('personas-chart').getContext('2d');
+            if (personasChart) personasChart.destroy();
+            personasChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{ label: 'Programaciones por Persona', data: Object.values(data), backgroundColor: '#ff9f40' }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    indexAxis: 'x', 
+                    plugins: { 
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Top 10 Personas con más programaciones'
+                        }
+                    } 
+                }
+            });
+        };
+
+        const downloadAnalyticsPdfBtn = document.getElementById('download-analytics-pdf-btn');
+
+        if (downloadAnalyticsPdfBtn) {
+            downloadAnalyticsPdfBtn.addEventListener('click', () => {
+                const charts = [
+                    { title: 'Consumo de Alimentos', image: foodChart ? foodChart.toBase64Image() : '' },
+                    { title: 'Uso de Transporte', image: transportChart ? transportChart.toBase64Image() : '' },
+                    { title: 'Total de Sedes', image: sedesChart ? sedesChart.toBase64Image() : '' },
+                    { title: 'Total de Áreas', image: areasChart ? areasChart.toBase64Image() : '' },
+                    { title: 'Total de Personas', image: personasChart ? personasChart.toBase64Image() : '' }
+                ].filter(c => c.image);
+
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const date_range = `Desde ${startDate} hasta ${endDate}`;
+
+                const formData = new FormData();
+                formData.append('action', 'download_analytics_pdf');
+                formData.append('charts', JSON.stringify(charts));
+                formData.append('date_range', date_range);
+
+                fetch('../api/handler.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'reporte_analiticas.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+            });
+        }
 
         generateReportBtn.addEventListener('click', generateCharts);
         generateCharts();
