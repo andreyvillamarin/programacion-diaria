@@ -118,23 +118,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteSelectedBtn.style.display = 'none';
                 return;
             }
-            let tableHtml = `<table class="data-table"><thead><tr><th><input type="checkbox" id="select-all-checkbox"></th><th>Persona</th><th>Área | WBE</th><th>Actividad</th><th>Sede</th><th>D</th><th>A</th><th>C</th><th>R1</th><th>RC</th><th>Transporte</th><th>Solicitante</th><th>Acción</th></tr></thead><tbody>`;
+            let tableHtml = `<table class="data-table"><thead><tr><th><input type="checkbox" id="select-all-checkbox"></th><th>Nombre</th><th>Área | WBE</th><th>Sede</th><th>Transporte</th><th>Zona</th><th>D</th><th>A</th><th>C</th><th>R1</th><th>RC</th><th>Actividad</th><th>Solicitante</th><th>Acción</th></tr></thead><tbody>`;
             programacion.forEach(item => {
                 const displayName = item.nombre_completo || item.nombre_manual || '(No especificado)';
                 const areaWbe = item.id_persona ? item.nombre_area : item.area_wbe;
                 tableHtml += `
                     <tr data-detail-id="${item.id}">
                         <td data-label="Seleccionar"><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-                        <td data-label="Persona">${displayName}</td>
+                        <td data-label="Nombre">${displayName}</td>
                         <td data-label="Área | WBE">${areaWbe}</td>
-                        <td data-label="Actividad">${item.actividad || ''}</td>
                         <td data-label="Sede">${item.nombre_sede}</td>
+                        <td data-label="Transporte">${item.transporte_tipo}</td>
+                        <td data-label="Zona">${item.zona || ''}</td>
                         <td data-label="D" class="check-cell">${parseInt(item.desayuno) ? '✔️' : ''}</td>
                         <td data-label="A" class="check-cell">${parseInt(item.almuerzo) ? '✔️' : ''}</td>
                         <td data-label="C" class="check-cell">${parseInt(item.comida) ? '✔️' : ''}</td>
                         <td data-label="R1" class="check-cell">${parseInt(item.refrigerio_tipo1) ? '✔️' : ''}</td>
                         <td data-label="RC" class="check-cell">${parseInt(item.refrigerio_capacitacion) ? '✔️' : ''}</td>
-                        <td data-label="Transporte">${item.transporte_tipo}</td>
+                        <td data-label="Actividad">${item.actividad || ''}</td>
                         <td data-label="Solicitante">${item.email_solicitante}</td>
                         <td data-label="Acción">
                             <a href="registro-editar.php?id=${item.id}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Editar</a>
@@ -634,6 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <th>Nombre</th>
                             <th>Tipo de Transporte</th>
                             <th>Sede de Destino</th>
+                            <th>Zona</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -644,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${r.nombre_completo}</td>
                         <td>${r.transporte_tipo}</td>
                         <td>${r.nombre_sede}</td>
+                        <td>${r.zona || ''}</td>
                     </tr>
                 `;
             });
