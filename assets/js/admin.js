@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         finalizeBtn.addEventListener('click', () => {
             const date = dateSelector.value;
-            if (confirm(`¿Está seguro de finalizar la programación para el ${date}?\n\nEsta acción enviará los reportes y no se podrá revertir.`)) {
+            if (confirm(`¿Está seguro de finalizar la programación para el ${date}?\n\nEsta acción enviará los reportes a todos los involucrados. Puede realizar esta acción cuantas veces sea necesario para ajustar la programación.`)) {
                 finalizeBtn.disabled = true;
                 finalizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finalizando...';
                 
