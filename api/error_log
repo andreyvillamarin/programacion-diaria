@@ -250,3 +250,9 @@ Stack trace:
 #2 /home/qdosnetw/public_html/demos/enel/api/handler.php(278): FPDF->Image()
 #3 {main}
   thrown in /home/qdosnetw/public_html/demos/enel/includes/lib/fpdf/fpdf.php on line 267
+[30-Jul-2025 09:24:10 America/Bogota] Error en add_manual_entry: La persona Yolima Quintero ya tiene una programación para el día 2025-07-31.
+[30-Jul-2025 15:09:16 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
+[30-Jul-2025 15:09:30 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
+[30-Jul-2025 15:09:39 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
+[30-Jul-2025 15:09:57 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
+[30-Jul-2025 15:10:54 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426

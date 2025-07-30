@@ -3,7 +3,7 @@
 <div class="container-fluid">
     <div class="card">
         <div class="card-header">
-            <h3>Programaci¨®n de Transporte</h3>
+            <h3>ProgramaciÃ³n de Transporte</h3>
             <div class="header-controls">
                 <div class="form-group">
                     <label for="transporter-date-selector">Seleccione una fecha:</label>
@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="card-body" id="transporter-dashboard-content">
-            <p class="loading-placeholder">Cargando datos de programaci¨®n...</p>
+            <p class="loading-placeholder">Cargando datos de programaciè»Šn...</p>
         </div>
     </div>
 </div>

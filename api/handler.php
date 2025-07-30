@@ -155,64 +155,89 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
             $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
         }
 
-        function FancyTable($header, $data)
+        function TableTitle($title)
         {
+            $this->SetFont('Arial','B',13);
+            $this->SetFillColor(200, 220, 255);
+            $this->Cell(0,10,utf8_decode($title),0,1,'C',true);
+            $this->Ln(4);
+        }
+        
+        function SedeTable($header, $data, $sede)
+        {
+            $this->TableTitle("Sede: " . $sede);
             $this->SetFillColor(23, 32, 42);
             $this->SetTextColor(255);
             $this->SetDrawColor(128);
             $this->SetLineWidth(.3);
-            $this->SetFont('','B');
+            $this->SetFont('','B', 8);
 
-            $w = array(40, 40, 40, 25, 10, 10, 10, 10, 10, 30, 40);
+            $w = array(40, 40, 30, 30, 10, 10, 10, 10, 10, 40, 40);
             for($i=0;$i<count($header);$i++)
                 $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
             $this->Ln();
 
-            $this->SetFillColor(224,235,255);
             $this->SetTextColor(0);
-            $this->SetFont('');
+            $this->SetFont('','', 8);
 
-            $fill = false;
+            $last_zona = null;
+            $last_transporte = null;
+
             foreach($data as $row)
             {
+                if ($row['zona'] !== $last_zona) {
+                    $this->SetFont('','B', 9);
+                    $this->SetFillColor(211, 211, 211);
+                    $this->Cell(array_sum($w), 8, "Zona: " . utf8_decode($row['zona']), 1, 1, 'C', true);
+                    $last_zona = $row['zona'];
+                    $last_transporte = null; // Reset transporte
+                }
+
+                if ($row['transporte_tipo'] !== $last_transporte) {
+                    $this->SetFont('','BI', 8);
+                    $this->SetFillColor(230, 230, 230);
+                    $this->Cell(array_sum($w), 7, "Transporte: " . utf8_decode($row['transporte_tipo']), 1, 1, 'L', true);
+                    $last_transporte = $row['transporte_tipo'];
+                }
+
+                $this->SetFont('','', 8);
+                $this->SetFillColor(255, 255, 255);
+
                 $displayName = $row['nombre_completo'] ?: $row['nombre_manual'];
                 $areaWbe = $row['id_persona'] ? $row['nombre_area'] : $row['area_wbe'];
 
-                // Calculate the height of the row
-                $nb=0;
                 $data_row = array(
                     utf8_decode($displayName),
                     utf8_decode($areaWbe),
-                    utf8_decode($row['actividad']),
-                    utf8_decode($row['nombre_sede']),
+                    utf8_decode($row['transporte_tipo']),
+                    utf8_decode($row['zona']),
                     $row['desayuno'] ? 'X' : '',
                     $row['almuerzo'] ? 'X' : '',
                     $row['comida'] ? 'X' : '',
                     $row['refrigerio_tipo1'] ? 'X' : '',
                     $row['refrigerio_capacitacion'] ? 'X' : '',
-                    utf8_decode($row['transporte_tipo']),
+                    utf8_decode($row['actividad']),
                     utf8_decode($row['email_solicitante'])
                 );
+
+                $nb=0;
                 for($i=0;$i<count($data_row);$i++)
                     $nb = max($nb, $this->NbLines($w[$i], $data_row[$i]));
                 $h = 6 * $nb;
-
-                // Issue a page break first if needed
                 $this->CheckPageBreak($h);
 
-                // Draw the cells of the row
                 for($i=0;$i<count($data_row);$i++)
                 {
                     $x = $this->GetX();
                     $y = $this->GetY();
-                    $this->Rect($x, $y, $w[$i], $h, 'DF');
-                    $this->MultiCell($w[$i], 6, $data_row[$i], 0, 'C', $fill);
+                    $this->Rect($x, $y, $w[$i], $h, 'D');
+                    $this->MultiCell($w[$i], 6, $data_row[$i], 0, 'C');
                     $this->SetXY($x + $w[$i], $y);
                 }
                 $this->Ln($h);
-                $fill = !$fill;
             }
             $this->Cell(array_sum($w),0,'','T');
+            $this->Ln(10);
         }
 
         function CheckPageBreak($h)
@@ -274,17 +299,29 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
 
     try {
         $date = $_GET['date'];
-        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
+        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, p.zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo, dp.nombre_manual" );
         $stmt->execute([$date]);
         $programacion = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        $programacion_por_sede = [];
+        foreach ($programacion as $registro) {
+            $programacion_por_sede[$registro['nombre_sede']][] = $registro;
+        }
+        
         $pdf = new PDF('L', 'mm', 'A4');
         $pdf->AliasNbPages();
         $pdf->AddPage();
         $pdf->SetFont('Arial','',10);
 
-        $header = array('Persona', 'Area | WBE', 'Actividad', 'Sede', 'D', 'A', 'C', 'R1', 'RC', 'Transporte', 'Solicitante');
-        $pdf->FancyTable($header,$programacion);
+        $header = array('Nombre', 'Area | WBE', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad', 'Solicitante');
+
+        if (isset($programacion_por_sede['Betania'])) {
+            $pdf->SedeTable($header, $programacion_por_sede['Betania'], 'Betania');
+        }
+        
+        if (isset($programacion_por_sede['Quimbo'])) {
+            $pdf->SedeTable($header, $programacion_por_sede['Quimbo'], 'Quimbo');
+        }
 
         $pdf->Output('D', "programacion_$date.pdf");
         exit;
@@ -324,9 +361,7 @@ if (isset($_SESSION['user_rol'])) {
             $personas_stmt = $pdo->prepare(
                 "SELECT 
                     COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, 
-                    a.nombre_area, 
-                    dp.desayuno, dp.almuerzo, dp.comida, 
-                    dp.refrigerio_tipo1, dp.refrigerio_capacitacion
+                    COALESCE(a.nombre_area, dp.area_wbe, 'N/A') as area
                  FROM detalle_programacion dp
                  JOIN programaciones pr ON dp.id_programacion = pr.id
                  LEFT JOIN personas p ON dp.id_persona = p.id
@@ -459,7 +494,7 @@ if (isset($_SESSION['user_rol'])) {
         try {
             $date = $_GET['date'];
             $stmt = $pdo->prepare(
-                "SELECT p.nombre_completo, s.nombre_sede, dp.transporte_tipo
+                "SELECT p.nombre_completo, s.nombre_sede, dp.transporte_tipo, p.zona
                  FROM detalle_programacion dp
                  JOIN programaciones pr ON dp.id_programacion = pr.id
                  JOIN personas p ON dp.id_persona = p.id
@@ -479,38 +514,117 @@ if (isset($_SESSION['user_rol'])) {
 
     if ($action === 'download_transporter_pdf' && isset($_GET['date'])) {
         require_once '../includes/lib/fpdf/fpdf.php';
+
+        class PDF_Transporter extends FPDF
+        {
+            var $date;
+
+            function Header()
+            {
+                $this->SetFont('Arial','B',15);
+                $this->SetFillColor(23, 32, 42);
+                $this->SetTextColor(255,255,255);
+                $this->Cell(0,15,utf8_decode('Rutas de Transporte para el día: ' . $this->date),0,1,'C',true);
+                $this->Ln(5);
+            }
+
+            function Footer()
+            {
+                $this->SetY(-15);
+                $this->SetFont('Arial','I',8);
+                $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
+            }
+
+            function TableTitle($title)
+            {
+                $this->SetFont('Arial','B',13);
+                $this->SetFillColor(200, 220, 255);
+                $this->Cell(0,10,utf8_decode($title),0,1,'C',true);
+                $this->Ln(4);
+            }
+            
+            function SedeTable($header, $data, $sede)
+            {
+                $this->TableTitle("Sede: " . $sede);
+                $this->SetFillColor(23, 32, 42);
+                $this->SetTextColor(255);
+                $this->SetDrawColor(128);
+                $this->SetLineWidth(.3);
+                $this->SetFont('','B', 10);
+
+                $w = array(70, 50, 50); // Anchos de columna para Nombre, Tipo de Ruta, Zona
+                for($i=0;$i<count($header);$i++)
+                    $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
+                $this->Ln();
+
+                $this->SetTextColor(0);
+                $this->SetFont('','', 9);
+
+                $last_zona = null;
+                $last_transporte = null;
+
+                foreach($data as $row)
+                {
+                    if ($row['zona'] !== $last_zona) {
+                        $this->SetFont('','B', 10);
+                        $this->SetFillColor(211, 211, 211);
+                        $this->Cell(array_sum($w), 8, "Zona: " . utf8_decode($row['zona']), 1, 1, 'C', true);
+                        $last_zona = $row['zona'];
+                        $last_transporte = null;
+                    }
+
+                    if ($row['transporte_tipo'] !== $last_transporte) {
+                        $this->SetFont('','BI', 9);
+                        $this->SetFillColor(230, 230, 230);
+                        $this->Cell(array_sum($w), 7, "Transporte: " . utf8_decode($row['transporte_tipo']), 1, 1, 'L', true);
+                        $last_transporte = $row['transporte_tipo'];
+                    }
+
+                    $this->SetFont('','', 9);
+                    $this->SetFillColor(255, 255, 255);
+                    
+                    $this->Cell($w[0], 6, utf8_decode($row['nombre_completo']), 1);
+                    $this->Cell($w[1], 6, utf8_decode($row['transporte_tipo']), 1);
+                    $this->Cell($w[2], 6, utf8_decode($row['zona']), 1);
+                    $this->Ln();
+                }
+                $this->Cell(array_sum($w),0,'','T');
+                $this->Ln(10);
+            }
+        }
         
         try {
             $date = $_GET['date'];
             $stmt = $pdo->prepare(
-                "SELECT p.nombre_completo, s.nombre_sede, dp.transporte_tipo
+                "SELECT p.nombre_completo, s.nombre_sede, dp.transporte_tipo, p.zona
                  FROM detalle_programacion dp
                  JOIN programaciones pr ON dp.id_programacion = pr.id
                  JOIN personas p ON dp.id_persona = p.id
                  JOIN sedes s ON dp.id_sede = s.id
                  WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere'
-                 ORDER BY s.nombre_sede, p.nombre_completo"
+                 ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo"
             );
             $stmt->execute([$date]);
             $reporte = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $pdf = new FPDF('P', 'mm', 'A4');
-            $pdf->AddPage();
-            $pdf->SetFont('Arial','B',16);
-            $pdf->Cell(0,10, "Rutas de Transporte - " . $date, 0, 1, 'C');
-            
-            $pdf->SetFont('Arial','B',12);
-            $pdf->Cell(80,10,'Persona',1);
-            $pdf->Cell(50,10,'Tipo de Ruta',1);
-            $pdf->Cell(60,10,'Sede Destino',1);
-            $pdf->Ln();
+            $reporte_por_sede = [];
+            foreach ($reporte as $registro) {
+                $reporte_por_sede[$registro['nombre_sede']][] = $registro;
+            }
 
-            $pdf->SetFont('Arial','',10);
-            foreach($reporte as $row) {
-                $pdf->Cell(80,10,utf8_decode($row['nombre_completo']),1);
-                $pdf->Cell(50,10,utf8_decode($row['transporte_tipo']),1);
-                $pdf->Cell(60,10,utf8_decode($row['nombre_sede']),1);
-                $pdf->Ln();
+            $pdf = new PDF_Transporter('P', 'mm', 'A4');
+            $pdf->date = $date;
+            $pdf->AliasNbPages();
+            $pdf->AddPage();
+            
+            $header = array('Nombre', 'Tipo de Ruta', 'Zona');
+
+            if (isset($reporte_por_sede['Betania'])) {
+                $pdf->SedeTable($header, $reporte_por_sede['Betania'], 'Betania');
+            }
+            
+            if (isset($reporte_por_sede['Quimbo'])) {
+                $pdf->SedeTable($header, $reporte_por_sede['Quimbo'], 'Quimbo');
             }
 
             $pdf->Output('D', "rutas_transporte_$date.pdf");
@@ -584,14 +698,6 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
         $fecha = $_POST['fecha_programacion'];
         $area_id = $_POST['area'];
 
-        $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
-        $check_stmt->execute([$fecha]);
-        if ($check_stmt->fetchColumn() > 0) {
-            $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
-            echo json_encode($response);
-            exit;
-        }
-
         if (!$fecha || !$area_id) { $response['message'] = 'Faltan datos generales.'; }
         else {
             try {
@@ -650,7 +756,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
     if ($action === 'get_admin_dashboard' && isset($_GET['date'])) {
         try {
             $date = $_GET['date'];
-            $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY p.nombre_completo, dp.nombre_manual" );
+            $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, p.zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY p.nombre_completo, dp.nombre_manual" );
             $stmt->execute([$date]);
             $programacion = $stmt->fetchAll();
 
@@ -691,10 +797,10 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
         try {
             $date = $_POST['date'];
             $pdo->beginTransaction();
-            $chef_reports_stmt = $pdo->prepare("SELECT dp.id_sede, s.nombre_sede, SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos, SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1, SUM(dp.refrigerio_capacitacion) as total_ref_cap FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' GROUP BY dp.id_sede");
+            $chef_reports_stmt = $pdo->prepare("SELECT dp.id_sede, s.nombre_sede, SUM(dp.desayuno) as total_desayunos, SUM(dp.almuerzo) as total_almuerzos, SUM(dp.comida) as total_comidas, SUM(dp.refrigerio_tipo1) as total_ref1, SUM(dp.refrigerio_capacitacion) as total_ref_cap FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? GROUP BY dp.id_sede");
             $chef_reports_stmt->execute([$date]);
             $chef_reports = $chef_reports_stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
-            $transporter_report_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, s.nombre_sede, dp.transporte_tipo FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id LEFT JOIN personas p ON dp.id_persona = p.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' AND dp.transporte_tipo != 'No requiere' ORDER BY s.nombre_sede, nombre_persona");
+            $transporter_report_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, s.nombre_sede, dp.transporte_tipo, p.zona FROM detalle_programacion dp JOIN programaciones pr ON dp.id_programacion = pr.id LEFT JOIN personas p ON dp.id_persona = p.id JOIN sedes s ON dp.id_sede = s.id WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere' ORDER BY s.nombre_sede, nombre_persona");
             $transporter_report_stmt->execute([$date]);
             $transporter_report = $transporter_report_stmt->fetchAll();
             $chefs = $pdo->query("SELECT email, id_sede FROM usuarios WHERE id_rol = 2 AND activo = 1")->fetchAll();
@@ -703,7 +809,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                 if (isset($chef_reports[$chef['id_sede']])) {
                     $report_data = $chef_reports[$chef['id_sede']][0];
                     
-                    $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND dp.id_sede = ? AND pr.estado = 'pendiente'");
+                    $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND dp.id_sede = ?");
                     $personas_stmt->execute([$date, $chef['id_sede']]);
                     $personas = $personas_stmt->fetchAll(PDO::FETCH_COLUMN);
                     $personas_list = '<ul><li>' . implode('</li><li>', $personas) . '</li></ul>';
@@ -720,7 +826,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
             if (!empty($transporter_report) && !empty($transporters)) {
                 $transport_rows = '';
                 foreach($transporter_report as $row) {
-                    $transport_rows .= "<tr><td>{$row['nombre_persona']}</td><td>{$row['transporte_tipo']}</td><td>{$row['nombre_sede']}</td></tr>";
+                    $transport_rows .= "<tr><td>{$row['nombre_persona']}</td><td>{$row['transporte_tipo']}</td><td>{$row['nombre_sede']}</td><td>{$row['zona']}</td></tr>";
                 }
                 $html_body = file_get_contents('../templates/email/reporte_transporte.html');
                 $html_body = str_replace(['{{fecha}}', '{{transport_rows}}'], [$date, $transport_rows], $html_body);
@@ -729,7 +835,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
             }
             $admin_emails = $pdo->query("SELECT email FROM usuarios WHERE id_rol = 1 AND activo = 1")->fetchAll(PDO::FETCH_COLUMN);
             if (!empty($admin_emails)) {
-                $programacion_stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND pr.estado = 'pendiente' ORDER BY p.nombre_completo, dp.nombre_manual" );
+                $programacion_stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, p.zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY p.nombre_completo, dp.nombre_manual" );
                 $programacion_stmt->execute([$date]);
                 $programacion_completa = $programacion_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -740,14 +846,15 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                     $programacion_rows .= "<tr>
                         <td>{$displayName}</td>
                         <td>{$areaWbe}</td>
-                        <td>{$row['actividad']}</td>
                         <td>{$row['nombre_sede']}</td>
+                        <td>{$row['transporte_tipo']}</td>
+                        <td>{$row['zona']}</td>
                         <td>".($row['desayuno'] ? 'X' : '')."</td>
                         <td>".($row['almuerzo'] ? 'X' : '')."</td>
                         <td>".($row['comida'] ? 'X' : '')."</td>
                         <td>".($row['refrigerio_tipo1'] ? 'X' : '')."</td>
                         <td>".($row['refrigerio_capacitacion'] ? 'X' : '')."</td>
-                        <td>{$row['transporte_tipo']}</td>
+                        <td>{$row['actividad']}</td>
                         <td>{$row['email_solicitante']}</td>
                     </tr>";
                 }
@@ -758,7 +865,7 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                 send_brevo_email($admin_emails_brevo, "Consolidado de Programación {$date}", $html_body, $pdo);
             }
 
-            $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ? AND estado = 'pendiente'");
+            $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ?");
             $update_stmt->execute([$date]);
             $pdo->commit();
             $response = ['success' => true, 'message' => '¡Proceso finalizado! Los reportes han sido enviados.'];

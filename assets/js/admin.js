@@ -118,25 +118,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteSelectedBtn.style.display = 'none';
                 return;
             }
-            let tableHtml = `<table class="data-table"><thead><tr><th><input type="checkbox" id="select-all-checkbox"></th><th>Persona</th><th>Área | WBE</th><th>Actividad</th><th>Sede</th><th>D</th><th>A</th><th>C</th><th>R1</th><th>RC</th><th>Transporte</th><th>Solicitante</th><th>Acción</th></tr></thead><tbody>`;
+            let tableHtml = `<table class="data-table"><thead><tr><th><input type="checkbox" id="select-all-checkbox"></th><th>Nombre</th><th>Área | WBE</th><th>Sede</th><th>Transporte</th><th>Zona</th><th>D</th><th>A</th><th>C</th><th>R1</th><th>RC</th><th>Actividad</th><th>Solicitante</th><th>Acción</th></tr></thead><tbody>`;
             programacion.forEach(item => {
                 const displayName = item.nombre_completo || item.nombre_manual || '(No especificado)';
                 const areaWbe = item.id_persona ? item.nombre_area : item.area_wbe;
                 tableHtml += `
                     <tr data-detail-id="${item.id}">
-                        <td><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-                        <td>${displayName}</td>
-                        <td>${areaWbe}</td>
-                        <td>${item.actividad || ''}</td>
-                        <td>${item.nombre_sede}</td>
-                        <td class="check-cell">${parseInt(item.desayuno) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.almuerzo) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.comida) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.refrigerio_tipo1) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.refrigerio_capacitacion) ? '✔️' : ''}</td>
-                        <td>${item.transporte_tipo}</td>
-                        <td>${item.email_solicitante}</td>
-                        <td>
+                        <td data-label="Seleccionar"><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
+                        <td data-label="Nombre">${displayName}</td>
+                        <td data-label="Área | WBE">${areaWbe}</td>
+                        <td data-label="Sede">${item.nombre_sede}</td>
+                        <td data-label="Transporte">${item.transporte_tipo}</td>
+                        <td data-label="Zona">${item.zona || ''}</td>
+                        <td data-label="D" class="check-cell">${parseInt(item.desayuno) ? '✔️' : ''}</td>
+                        <td data-label="A" class="check-cell">${parseInt(item.almuerzo) ? '✔️' : ''}</td>
+                        <td data-label="C" class="check-cell">${parseInt(item.comida) ? '✔️' : ''}</td>
+                        <td data-label="R1" class="check-cell">${parseInt(item.refrigerio_tipo1) ? '✔️' : ''}</td>
+                        <td data-label="RC" class="check-cell">${parseInt(item.refrigerio_capacitacion) ? '✔️' : ''}</td>
+                        <td data-label="Actividad">${item.actividad || ''}</td>
+                        <td data-label="Solicitante">${item.email_solicitante}</td>
+                        <td data-label="Acción">
                             <a href="registro-editar.php?id=${item.id}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Editar</a>
                             <a href="eliminar.php?tipo=detalle_programacion&id=${item.id}" class="btn btn-sm btn-danger delete-btn"><i class="fas fa-trash"></i> Eliminar</a>
                         </td>
@@ -190,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         finalizeBtn.addEventListener('click', () => {
             const date = dateSelector.value;
-            if (confirm(`¿Está seguro de finalizar la programación para el ${date}?\n\nEsta acción enviará los reportes y no se podrá revertir.`)) {
+            if (confirm(`¿Está seguro de finalizar la programación para el ${date}?\n\nEsta acción enviará los reportes a todos los involucrados. Puede realizar esta acción cuantas veces sea necesario para ajustar la programación.`)) {
                 finalizeBtn.disabled = true;
                 finalizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finalizando...';
                 
@@ -511,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (casinoDateSelector) {
         const casinoDashboardContent = document.getElementById('casino-dashboard-content');
         const downloadCasinoPdfBtn = document.getElementById('download-casino-pdf-btn');
+        const casinoTitle = document.querySelector('.card-header h3');
 
         const loadCasinoData = (date) => {
             casinoDashboardContent.innerHTML = '<p class="loading-placeholder">Cargando datos de programación...</p>';
@@ -532,6 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.innerHTML = '<p>No hay datos de casino para la fecha seleccionada.</p>';
                 return;
             }
+            casinoTitle.textContent = `Programación de Casino - Sede ${reporte.nombre_sede || 'N/A'}`;
             let html = `
                 <div class="stat-cards-container">
                     <div class="stat-card-item">
@@ -566,11 +569,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <tr>
                             <th>Nombre</th>
                             <th>Área</th>
-                            <th>D</th>
-                            <th>A</th>
-                            <th>C</th>
-                            <th>R1</th>
-                            <th>RC</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -580,17 +578,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     html += `
                         <tr>
                             <td>${p.nombre_persona}</td>
-                            <td>${p.nombre_area || 'N/A'}</td>
-                            <td class="check-cell">${p.desayuno ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.almuerzo ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.comida ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.refrigerio_tipo1 ? '✔️' : ''}</td>
-                            <td class="check-cell">${p.refrigerio_capacitacion ? '✔️' : ''}</td>
+                            <td>${p.area || 'N/A'}</td>
                         </tr>
                     `;
                 });
             } else {
-                html += '<tr><td colspan="7">No hay personal programado para esta fecha.</td></tr>';
+                html += '<tr><td colspan="2">No hay personal programado para esta fecha.</td></tr>';
             }
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -642,6 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <th>Nombre</th>
                             <th>Tipo de Transporte</th>
                             <th>Sede de Destino</th>
+                            <th>Zona</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -652,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${r.nombre_completo}</td>
                         <td>${r.transporte_tipo}</td>
                         <td>${r.nombre_sede}</td>
+                        <td>${r.zona || ''}</td>
                     </tr>
                 `;
             });
