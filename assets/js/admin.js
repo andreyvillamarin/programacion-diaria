@@ -124,19 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const areaWbe = item.id_persona ? item.nombre_area : item.area_wbe;
                 tableHtml += `
                     <tr data-detail-id="${item.id}">
-                        <td><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-                        <td>${displayName}</td>
-                        <td>${areaWbe}</td>
-                        <td>${item.actividad || ''}</td>
-                        <td>${item.nombre_sede}</td>
-                        <td class="check-cell">${parseInt(item.desayuno) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.almuerzo) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.comida) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.refrigerio_tipo1) ? '✔️' : ''}</td>
-                        <td class="check-cell">${parseInt(item.refrigerio_capacitacion) ? '✔️' : ''}</td>
-                        <td>${item.transporte_tipo}</td>
-                        <td>${item.email_solicitante}</td>
-                        <td>
+                        <td data-label="Seleccionar"><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
+                        <td data-label="Persona">${displayName}</td>
+                        <td data-label="Área | WBE">${areaWbe}</td>
+                        <td data-label="Actividad">${item.actividad || ''}</td>
+                        <td data-label="Sede">${item.nombre_sede}</td>
+                        <td data-label="D" class="check-cell">${parseInt(item.desayuno) ? '✔️' : ''}</td>
+                        <td data-label="A" class="check-cell">${parseInt(item.almuerzo) ? '✔️' : ''}</td>
+                        <td data-label="C" class="check-cell">${parseInt(item.comida) ? '✔️' : ''}</td>
+                        <td data-label="R1" class="check-cell">${parseInt(item.refrigerio_tipo1) ? '✔️' : ''}</td>
+                        <td data-label="RC" class="check-cell">${parseInt(item.refrigerio_capacitacion) ? '✔️' : ''}</td>
+                        <td data-label="Transporte">${item.transporte_tipo}</td>
+                        <td data-label="Solicitante">${item.email_solicitante}</td>
+                        <td data-label="Acción">
                             <a href="registro-editar.php?id=${item.id}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Editar</a>
                             <a href="eliminar.php?tipo=detalle_programacion&id=${item.id}" class="btn btn-sm btn-danger delete-btn"><i class="fas fa-trash"></i> Eliminar</a>
                         </td>
