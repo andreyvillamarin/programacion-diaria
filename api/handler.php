@@ -384,9 +384,89 @@ if (isset($_SESSION['user_rol'])) {
     if ($action === 'download_casino_pdf' && isset($_GET['date'])) {
         require_once '../includes/lib/fpdf/fpdf.php';
         
+        class PDF_Casino extends FPDF
+        {
+            var $date;
+            var $nombre_sede;
+
+            function Header()
+            {
+                $this->SetFont('Arial','B',15);
+                $this->SetFillColor(23, 32, 42);
+                $this->SetTextColor(255,255,255);
+                $this->Cell(0,15,utf8_decode("Reporte de Casino - Sede: {$this->nombre_sede}"),0,1,'C',true);
+                $this->SetFont('Arial','',12);
+                $this->Cell(0,10, "Fecha: " . $this->date, 0, 1, 'C');
+                $this->Ln(5);
+            }
+
+            function Footer()
+            {
+                $this->SetY(-15);
+                $this->SetFont('Arial','I',8);
+                $this->Cell(0,10,utf8_decode('Página ').$this->PageNo().'/{nb}',0,0,'C');
+            }
+
+            function TableTitle($title)
+            {
+                $this->SetFont('Arial','B',13);
+                $this->SetFillColor(200, 220, 255);
+                $this->Cell(0,10,utf8_decode($title),0,1,'C',true);
+                $this->Ln(4);
+            }
+
+            function ResumenTable($header, $data)
+            {
+                $this->SetFont('','B', 10);
+                $this->SetFillColor(23, 32, 42);
+                $this->SetTextColor(255);
+                $this->SetDrawColor(128);
+                $this->SetLineWidth(.3);
+                
+                $w = array(95, 95);
+                for($i=0;$i<count($header);$i++)
+                    $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
+                $this->Ln();
+
+                $this->SetTextColor(0);
+                $this->SetFont('','', 10);
+                foreach($data as $label => $value){
+                    $this->Cell($w[0],8,utf8_decode($label),1);
+                    $this->Cell($w[1],8,$value,1,0,'C');
+                    $this->Ln();
+                }
+            }
+
+            function PersonalTable($header, $data)
+            {
+                $this->SetFillColor(23, 32, 42);
+                $this->SetTextColor(255);
+                $this->SetDrawColor(128);
+                $this->SetLineWidth(.3);
+                $this->SetFont('','B', 10);
+
+                $w = array(70, 50, 12, 12, 12, 12, 12);
+                for($i=0;$i<count($header);$i++)
+                    $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
+                $this->Ln();
+
+                $this->SetTextColor(0);
+                $this->SetFont('','', 9);
+                foreach($data as $row){
+                    $this->Cell($w[0], 6, utf8_decode($row['nombre_persona']), 1);
+                    $this->Cell($w[1], 6, utf8_decode($row['area']), 1);
+                    $this->Cell($w[2], 6, $row['desayuno'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[3], 6, $row['almuerzo'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[4], 6, $row['comida'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[5], 6, $row['refrigerio_tipo1'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[6], 6, $row['refrigerio_capacitacion'] ? 'X' : '', 1, 0, 'C');
+                    $this->Ln();
+                }
+            }
+        }
+
         try {
             $date = $_GET['date'];
-            $sede_id = $_SESSION['user_sede'] ?? 0;
             $sede_id = $_SESSION['user_sede'] ?? 0;
 
             // Obtener el nombre de la sede
@@ -425,60 +505,29 @@ if (isset($_SESSION['user_rol'])) {
             $personas_stmt->execute([$date, $sede_id]);
             $personas = $personas_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $pdf = new FPDF('P', 'mm', 'A4');
+            $pdf = new PDF_Casino('P', 'mm', 'A4');
+            $pdf->date = $date;
+            $pdf->nombre_sede = $nombre_sede;
+            $pdf->AliasNbPages();
             $pdf->AddPage();
-            $pdf->SetFont('Arial','B',16);
-            $pdf->Cell(0,10, utf8_decode("Reporte de Casino - Sede: $nombre_sede"), 0, 1, 'C');
-            $pdf->SetFont('Arial','',12);
-            $pdf->Cell(0,10, "Fecha: " . $date, 0, 1, 'C');
-            $pdf->Ln(10);
 
             // Tabla de Resumen
-            $pdf->SetFont('Arial','B',12);
-            $pdf->Cell(95,10,'Tipo de Comida',1,0,'C');
-            $pdf->Cell(95,10,'Cantidad',1,0,'C');
-            $pdf->Ln();
-            $pdf->SetFont('Arial','',10);
-            $data = [
+            $pdf->TableTitle('Resumen de Comidas');
+            $header_resumen = array('Tipo de Comida', 'Cantidad');
+            $data_resumen = [
                 'Desayunos' => $resumen['total_desayunos'],
                 'Almuerzos' => $resumen['total_almuerzos'],
                 'Comidas' => $resumen['total_comidas'],
                 'Refrigerio Tipo 1' => $resumen['total_ref1'],
                 'Refrigerio Capacitacion' => $resumen['total_ref_cap']
             ];
-            foreach($data as $label => $value){
-                $pdf->Cell(95,8,utf8_decode($label),1);
-                $pdf->Cell(95,8,$value,1,0,'C');
-                $pdf->Ln();
-            }
+            $pdf->ResumenTable($header_resumen, $data_resumen);
             $pdf->Ln(10);
 
             // Tabla de Personal
-            $pdf->SetFont('Arial','B',12);
-            $pdf->Cell(0,10,'Listado Detallado de Personal',0,1,'C');
-            $pdf->Ln(5);
-
-            $pdf->SetFont('Arial','B',10);
-            $pdf->Cell(70, 7, 'Nombre', 1, 0, 'C');
-            $pdf->Cell(50, 7, utf8_decode('Área'), 1, 0, 'C');
-            $pdf->Cell(12, 7, 'D', 1, 0, 'C');
-            $pdf->Cell(12, 7, 'A', 1, 0, 'C');
-            $pdf->Cell(12, 7, 'C', 1, 0, 'C');
-            $pdf->Cell(12, 7, 'R1', 1, 0, 'C');
-            $pdf->Cell(12, 7, 'RC', 1, 0, 'C');
-            $pdf->Ln();
-
-            $pdf->SetFont('Arial','',9);
-            foreach($personas as $persona){
-                $pdf->Cell(70, 6, utf8_decode($persona['nombre_persona']), 1);
-                $pdf->Cell(50, 6, utf8_decode($persona['area']), 1);
-                $pdf->Cell(12, 6, $persona['desayuno'] ? 'X' : '', 1, 0, 'C');
-                $pdf->Cell(12, 6, $persona['almuerzo'] ? 'X' : '', 1, 0, 'C');
-                $pdf->Cell(12, 6, $persona['comida'] ? 'X' : '', 1, 0, 'C');
-                $pdf->Cell(12, 6, $persona['refrigerio_tipo1'] ? 'X' : '', 1, 0, 'C');
-                $pdf->Cell(12, 6, $persona['refrigerio_capacitacion'] ? 'X' : '', 1, 0, 'C');
-                $pdf->Ln();
-            }
+            $pdf->TableTitle('Listado Detallado de Personal');
+            $header_personal = array('Nombre', utf8_decode('Área'), 'D', 'A', 'C', 'R1', 'RC');
+            $pdf->PersonalTable($header_personal, $personas);
             
             $pdf->Output('D', "reporte_casino_{$nombre_sede}_{$date}.pdf");
             exit;
