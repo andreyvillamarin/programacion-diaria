@@ -14,12 +14,13 @@ if (!$person_id) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre_completo = $_POST['nombre_completo'];
     $id_area = $_POST['id_area'];
+    $zona = $_POST['zona'];
     $activo = isset($_POST['activo']) ? 1 : 0;
 
     $stmt = $pdo->prepare(
-        "UPDATE personas SET nombre_completo = ?, id_area = ?, activo = ? WHERE id = ?"
+        "UPDATE personas SET nombre_completo = ?, id_area = ?, zona = ?, activo = ? WHERE id = ?"
     );
-    $stmt->execute([$nombre_completo, $id_area, $activo, $person_id]);
+    $stmt->execute([$nombre_completo, $id_area, $zona, $activo, $person_id]);
 
     header("Location: personas.php");
     exit;
@@ -65,6 +66,11 @@ include '../templates/header.php';
                             </option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="zona">Zona</label>
+                    <input type="text" id="zona" name="zona" value="<?= htmlspecialchars($persona['zona']) ?>" required>
                 </div>
 
                 <div class="form-group">
