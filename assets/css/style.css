@@ -320,9 +320,10 @@ textarea { min-height: 100px; resize: vertical; }
         padding-left: 40%;
         position: relative;
         word-break: break-word;
+        min-height: 38px;
     }
     .data-table td[data-label="Persona"] {
-        background-color: var(--grey-dark);
+        background-color: var(--grey-dark) !important;
         font-weight: bold;
     }
     .data-table td::before {
