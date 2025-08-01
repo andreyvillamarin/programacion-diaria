@@ -256,3 +256,22 @@ Stack trace:
 [30-Jul-2025 15:09:39 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
 [30-Jul-2025 15:09:57 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
 [30-Jul-2025 15:10:54 America/Bogota] PHP Parse error:  syntax error, unexpected token "," in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 426
+[30-Jul-2025 17:59:59 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 17:59:59 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:00:00 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:02:14 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:02:15 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:02:16 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:29:26 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:29:26 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 18:29:27 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[30-Jul-2025 19:35:40 America/Bogota] Error en submit_form: La persona Ana Ibette Polania Herrera ya tiene una programación para el día 2025-08-01.

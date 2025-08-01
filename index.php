@@ -18,18 +18,20 @@
     <div class="info-pane">
         <div class="info-header">
             <h2><?= APP_NAME ?></h2>
-            <p>Plataforma para la programación diaria de servicios de alimentación y transporte.</p>
+            <p>Plataforma para la programación diaria de servicios de alimentación y transporte centrales Betania | Quimbo.</p>
         </div>
         <div class="info-steps">
             <h4>Sigue estos pasos:</h4>
             <ol>
-                <li><span>1</span> Elige tu área. Si no la encuentras, selecciona "Otras Áreas".</li>
-                <li><span>2</span> Completa la programación según el formulario que aparezca.</li>
-                <li><span>3</span> Ingresa tu correo y envía. ¡Listo!</li>
+                <li><span>1</span> Elige "Tu Área". Si no la encuentras, selecciona "Otras Áreas".</li>
+                <li><span>2</span> "Opcional" Si quieres recibir copia de la programación, escribe tu correo .</li>
+                <li><span>3</span> Selecciona la fecha que quieres programar.</li>
+                <li><span>4</span> Selecciona los servicios que requieres y la central.</li>
+                <li><span>5</span> Haz click en "Enviar Programación". ¡Listo!</li>
             </ol>
         </div>
         <div class="info-footer">
-            <p>Si tienes problemas, contacta al administrador del sistema.</p>
+            <p>Cualquier cambio o modificación favor informar en el chat de WhatsApp.</p>
         </div>
     </div>
 
