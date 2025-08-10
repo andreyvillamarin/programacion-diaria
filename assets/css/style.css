@@ -377,3 +377,17 @@ textarea { min-height: 100px; resize: vertical; }
     color: #7a8b9e;
     font-weight: 500;
 }
+
+.form-messages-container {
+    margin-top: 15px;
+    width: 100%;
+}
+
+.form-messages-container .error-message,
+.form-messages-container .success-message {
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1em;
+    margin: 0;
+}

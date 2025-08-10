@@ -43,8 +43,6 @@
                     <p>Los campos marcados con * son obligatorios.</p>
                 </div>
 
-                <div id="form-messages"></div>
-
                 <fieldset>
                     <legend>Datos del Solicitante</legend>
                     <div class="form-group">
@@ -77,6 +75,7 @@
                 <button type="submit" class="btn-submit" id="submit-btn">
                     <i class="fas fa-paper-plane"></i> Enviar Programación
                 </button>
+                <div id="form-messages" class="form-messages-container"></div>
             </form>
         <?php else: ?>
             <div class="form-closed-message">

@@ -13,13 +13,13 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha = $_POST['fecha_programacion'];
     $area_id = $_POST['area'];
 
-    $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
-    $check_stmt->execute([$fecha]);
-    if ($check_stmt->fetchColumn() > 0) {
-        $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
-        echo json_encode($response);
-        exit;
-    }
+    // $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
+    // $check_stmt->execute([$fecha]);
+    // if ($check_stmt->fetchColumn() > 0) {
+    //     $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
+    //     echo json_encode($response);
+    //     exit;
+    // }
 
     if (!$fecha || !$area_id) {
         $response['message'] = 'Faltan datos del solicitante. Por favor complete el formulario.';
@@ -313,7 +313,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
         $pdf->AddPage();
         $pdf->SetFont('Arial','',10);
 
-        $header = array('Nombre', 'Area | WBE', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad', 'Solicitante');
+        $header = array('Nombre', 'Area | WBE', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad | Nota', 'Solicitante');
 
         if (isset($programacion_por_sede['Betania'])) {
             $pdf->SedeTable($header, $programacion_por_sede['Betania'], 'Betania');
@@ -779,15 +779,15 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                                 throw new Exception("Se debe seleccionar una sede de destino para {$person_name} ya que se ha seleccionado un tipo de transporte.");
                             }
 
-                            // Verificar si la persona ya tiene una programación para ese día
-                            $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM detalle_programacion dp JOIN programaciones p ON dp.id_programacion = p.id WHERE dp.id_persona = ? AND p.fecha_programacion = ?");
-                            $check_stmt->execute([$person_id, $fecha]);
-                            if ($check_stmt->fetchColumn() > 0) {
-                                $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
-                                $person_name_stmt->execute([$person_id]);
-                                $person_name = $person_name_stmt->fetchColumn();
-                                throw new Exception("La persona {$person_name} ya tiene una programación para el día {$fecha}.");
-                            }
+                            // // Verificar si la persona ya tiene una programación para ese día
+                            // $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM detalle_programacion dp JOIN programaciones p ON dp.id_programacion = p.id WHERE dp.id_persona = ? AND p.fecha_programacion = ?");
+                            // $check_stmt->execute([$person_id, $fecha]);
+                            // if ($check_stmt->fetchColumn() > 0) {
+                            //     $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
+                            //     $person_name_stmt->execute([$person_id]);
+                            //     $person_name = $person_name_stmt->fetchColumn();
+                            //     throw new Exception("La persona {$person_name} ya tiene una programación para el día {$fecha}.");
+                            // }
                             $stmt_detail->execute([':prog_id' => $prog_id, ':persona_id' => $person_id, ':sede_id' => $details['id_sede'], ':desayuno' => isset($details['desayuno']) ? 1 : 0, ':almuerzo' => isset($details['almuerzo']) ? 1 : 0, ':comida' => isset($details['comida']) ? 1 : 0, ':ref1' => isset($details['refrigerio_tipo1']) ? 1 : 0, ':ref_cap' => isset($details['refrigerio_capacitacion']) ? 1 : 0, ':transporte' => $details['transporte_tipo'] ?? 'No requiere']);
                         }
                     }
@@ -914,8 +914,8 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                 send_brevo_email($admin_emails_brevo, "Consolidado de Programación {$date}", $html_body, $pdo);
             }
 
-            $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ?");
-            $update_stmt->execute([$date]);
+            // $update_stmt = $pdo->prepare("UPDATE programaciones SET estado = 'finalizada' WHERE fecha_programacion = ?");
+            // $update_stmt->execute([$date]);
             $pdo->commit();
             $response = ['success' => true, 'message' => '¡Proceso finalizado! Los reportes han sido enviados.'];
         } catch (Exception $e) { $pdo->rollBack(); $response = ['success' => false, 'message' => 'Error Crítico: ' . $e->getMessage()]; }

@@ -20,20 +20,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $refrigerio_capacitacion = isset($_POST['refrigerio_capacitacion']) ? 1 : 0;
     $transporte_tipo = $_POST['transporte_tipo'];
 
+    $actividad = $_POST['actividad'] ?? '';
+
     // Si es un registro de "otras áreas", también actualizamos los campos de texto
     if (isset($_POST['nombre_manual'])) {
         $nombre_manual = $_POST['nombre_manual'];
         $area_wbe = $_POST['area_wbe'];
-        $actividad = $_POST['actividad'];
         $stmt = $pdo->prepare(
             "UPDATE detalle_programacion SET id_sede = ?, desayuno = ?, almuerzo = ?, comida = ?, refrigerio_tipo1 = ?, refrigerio_capacitacion = ?, transporte_tipo = ?, nombre_manual = ?, area_wbe = ?, actividad = ? WHERE id = ?"
         );
         $stmt->execute([$id_sede, $desayuno, $almuerzo, $comida, $refrigerio_tipo1, $refrigerio_capacitacion, $transporte_tipo, $nombre_manual, $area_wbe, $actividad, $detail_id]);
     } else {
         $stmt = $pdo->prepare(
-            "UPDATE detalle_programacion SET id_sede = ?, desayuno = ?, almuerzo = ?, comida = ?, refrigerio_tipo1 = ?, refrigerio_capacitacion = ?, transporte_tipo = ? WHERE id = ?"
+            "UPDATE detalle_programacion SET id_sede = ?, desayuno = ?, almuerzo = ?, comida = ?, refrigerio_tipo1 = ?, refrigerio_capacitacion = ?, transporte_tipo = ?, actividad = ? WHERE id = ?"
         );
-        $stmt->execute([$id_sede, $desayuno, $almuerzo, $comida, $refrigerio_tipo1, $refrigerio_capacitacion, $transporte_tipo, $detail_id]);
+        $stmt->execute([$id_sede, $desayuno, $almuerzo, $comida, $refrigerio_tipo1, $refrigerio_capacitacion, $transporte_tipo, $actividad, $detail_id]);
     }
 
     header("Location: index.php");
@@ -77,11 +78,12 @@ include '../templates/header.php';
                         <label>Área | WBE</label>
                         <input type="text" name="area_wbe" value="<?= htmlspecialchars($detalle['area_wbe']) ?>" required>
                     </div>
-                    <div class="form-group">
-                        <label>Actividad a Realizar</label>
-                        <textarea name="actividad" required><?= htmlspecialchars($detalle['actividad']) ?></textarea>
-                    </div>
                 <?php endif; ?>
+
+                <div class="form-group">
+                    <label>Actividad | Nota (Uso interno)</label>
+                    <textarea name="actividad"><?= htmlspecialchars($detalle['actividad']) ?></textarea>
+                </div>
 
                 <div class="service-section">
                     <h5><i class="fas fa-utensils"></i> Alimentación</h5>
