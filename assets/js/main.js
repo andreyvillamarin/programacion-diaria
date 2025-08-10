@@ -39,7 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isOtherArea) {
             otherAreaFieldset.classList.remove('hidden');
-            renderServicesOnly([], [], otherAreaServicesContainer);
+            otherAreaServicesContainer.innerHTML = '<p class="loading">Cargando servicios...</p>';
+            fetch(`api/data.php?action=get_services_only`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        renderServicesOnly(data.sedes, data.transport_options, otherAreaServicesContainer);
+                    }
+                });
         } else {
             peopleFieldset.classList.remove('hidden');
             peopleContainer.innerHTML = '<p class="loading">Cargando personal...</p>';
@@ -124,22 +131,17 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
                     <h5><i class="fas fa-bus"></i> Transporte</h5>
                     <label>Tipo:</label>
                     <select name="${namePrefix}[transporte_tipo]" required>
-                        <option value="Ruta Ordinaria Diurna">Ruta Ordinaria Diurna</option>
-                        <option value="Ruta Ordinaria Nocturna">Ruta Ordinaria Nocturna</option>
-                        <option value="Ruta Operación Diurna">Ruta Operación Diurna</option>
-                        <option value="Ruta Operación Nocturna">Ruta Operación Nocturna</option>
-                        <option value="Ruta Cambio Ing. Disponible">Ruta Cambio Ing. Disponible</option>
-                        <option value="Camioneta Renting">Camioneta Renting</option>
-                        <option value="Ingeniero Disponible">Ingeniero Disponible</option>
-                        <option value="Vehículo Propio">Vehículo Propio</option>
-                        <option value="No requiere">No requiere</option>
-                        <option value="Otro">Otro</option>
+                        <option value="">-- Seleccione --</option>
+                        ${transportOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                     </select>
                 </div>
                 <div class="service-section">
                      <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino *</h5>
-                     <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="1" required> Betania</label>
-                     <label class="radio-label"><input type="radio" name="${namePrefix}[id_sede]" value="2" required> Quimbo</label>
+                     ${sedes.map(sede => `
+                        <label class="radio-label">
+                            <input type="radio" name="${namePrefix}[id_sede]" value="${sede.id}" required> ${sede.nombre_sede}
+                        </label>
+                     `).join('')}
                 </div>
             </div>
         </div>

@@ -55,7 +55,11 @@ $person_name = $detalle['id_persona'] ? $detalle['nombre_completo'] : $detalle['
 
 // Obtener todas las sedes activas para el dropdown
 $sedes_activas = $pdo->query("SELECT id, nombre_sede FROM sedes ORDER BY nombre_sede")->fetchAll();
-$transport_options = ["Ruta Ordinaria Diurna", "Ruta Ordinaria Nocturna", "Ruta Operación Diurna", "Ruta Operación Nocturna", "Ruta Cambio Ing. Disponible", "Camioneta Renting", "Ingeniero Disponible", "Vehículo Propio", "No requiere", "Otro"];
+
+// Obtener las opciones de transporte dinámicamente de la DB
+$result = $pdo->query("SHOW COLUMNS FROM `detalle_programacion` LIKE 'transporte_tipo'");
+preg_match("/^enum\(\'(.*)\'\)$/", $result->fetch()['Type'], $matches);
+$transport_options = explode("','", $matches[1]);
 
 $page_title = "Editar Registro de Programación";
 include '../templates/header.php';
