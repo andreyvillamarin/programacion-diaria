@@ -17,3 +17,375 @@
 
 [10-Aug-2025 14:08:41 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
 
+[10-Aug-2025 14:36:47 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 14:36:48 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 14:36:50 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:11:48 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:11:48 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:11:50 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:16:55 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:16:56 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:16:57 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:25:53 America/Bogota] --- CASINO EMAIL DEBUG ---
+[10-Aug-2025 20:25:53 America/Bogota] Processing for chef: andreyvillamarin@gmail.com at sede_id: 1
+[10-Aug-2025 20:25:53 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Betania
+    [total_desayunos] => 2
+    [total_almuerzos] => 1
+    [total_comidas] => 0
+    [total_ref1] => 0
+    [total_ref_cap] => 0
+)
+
+[10-Aug-2025 20:25:53 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentación</h1>
+        </div>
+        <div class="content">
+            <h2>Betania - 2025-08-11</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>2</span></li>
+                <li>Almuerzos <span>1</span></li>
+                <li>Comidas <span>0</span></li>
+                <li>Refrigerio Tipo 1 <span>0</span></li>
+                <li>Refrigerio Capacitación <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">脕rea | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[10-Aug-2025 20:25:54 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:25:54 America/Bogota] send_brevo_email result: Failure
+[10-Aug-2025 20:25:54 America/Bogota] --- END DEBUG ---
+[10-Aug-2025 20:25:54 America/Bogota] --- CASINO EMAIL DEBUG ---
+[10-Aug-2025 20:25:54 America/Bogota] Processing for chef: aavillamarin2@gmail.com at sede_id: 2
+[10-Aug-2025 20:25:54 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Quimbo
+    [total_desayunos] => 2
+    [total_almuerzos] => 3
+    [total_comidas] => 2
+    [total_ref1] => 2
+    [total_ref_cap] => 0
+)
+
+[10-Aug-2025 20:25:54 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentación</h1>
+        </div>
+        <div class="content">
+            <h2>Quimbo - 2025-08-11</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>2</span></li>
+                <li>Almuerzos <span>3</span></li>
+                <li>Comidas <span>2</span></li>
+                <li>Refrigerio Tipo 1 <span>2</span></li>
+                <li>Refrigerio Capacitación <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">脕rea | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">Ana Ibette Polania Herrera</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yolima Quintero</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[10-Aug-2025 20:25:54 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:25:54 America/Bogota] send_brevo_email result: Failure
+[10-Aug-2025 20:25:54 America/Bogota] --- END DEBUG ---
+[10-Aug-2025 20:25:55 America/Bogota] Error de Brevo (HTTP 400): {"code":"missing_parameter","message":"No input in body"}
+
+[10-Aug-2025 20:29:49 America/Bogota] --- CASINO EMAIL DEBUG ---
+[10-Aug-2025 20:29:49 America/Bogota] Processing for chef: andreyvillamarin@gmail.com at sede_id: 1
+[10-Aug-2025 20:29:49 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Betania
+    [total_desayunos] => 2
+    [total_almuerzos] => 1
+    [total_comidas] => 0
+    [total_ref1] => 0
+    [total_ref_cap] => 0
+)
+
+[10-Aug-2025 20:29:49 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentación</h1>
+        </div>
+        <div class="content">
+            <h2>Betania - 2025-08-11</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>2</span></li>
+                <li>Almuerzos <span>1</span></li>
+                <li>Comidas <span>0</span></li>
+                <li>Refrigerio Tipo 1 <span>0</span></li>
+                <li>Refrigerio Capacitación <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">脕rea | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[10-Aug-2025 20:29:51 America/Bogota] send_brevo_email result: Success
+[10-Aug-2025 20:29:51 America/Bogota] --- END DEBUG ---
+[10-Aug-2025 20:29:51 America/Bogota] --- CASINO EMAIL DEBUG ---
+[10-Aug-2025 20:29:51 America/Bogota] Processing for chef: aavillamarin2@gmail.com at sede_id: 2
+[10-Aug-2025 20:29:51 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Quimbo
+    [total_desayunos] => 2
+    [total_almuerzos] => 3
+    [total_comidas] => 2
+    [total_ref1] => 2
+    [total_ref_cap] => 0
+)
+
+[10-Aug-2025 20:29:51 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentación</h1>
+        </div>
+        <div class="content">
+            <h2>Quimbo - 2025-08-11</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>2</span></li>
+                <li>Almuerzos <span>3</span></li>
+                <li>Comidas <span>2</span></li>
+                <li>Refrigerio Tipo 1 <span>2</span></li>
+                <li>Refrigerio Capacitación <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">脕rea | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">Ana Ibette Polania Herrera</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yolima Quintero</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[10-Aug-2025 20:29:52 America/Bogota] send_brevo_email result: Success
+[10-Aug-2025 20:29:52 America/Bogota] --- END DEBUG ---
+[10-Aug-2025 20:38:58 America/Bogota] --- CASINO EMAIL DEBUG ---
+[10-Aug-2025 20:38:58 America/Bogota] Processing for chef: andreyvillamarin@gmail.com at sede_id: 1
+[10-Aug-2025 20:38:58 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Betania
+    [total_desayunos] => 2
+    [total_almuerzos] => 1
+    [total_comidas] => 0
+    [total_ref1] => 0
+    [total_ref_cap] => 0
+)
+
+[10-Aug-2025 20:38:58 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentaci贸n</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentaci贸n</h1>
+        </div>
+        <div class="content">
+            <h2>Betania - 2025-08-11</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>2</span></li>
+                <li>Almuerzos <span>1</span></li>
+                <li>Comidas <span>0</span></li>
+                <li>Refrigerio Tipo 1 <span>0</span></li>
+                <li>Refrigerio Capacitaci贸n <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">脕rea | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado autom谩ticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[10-Aug-2025 20:38:59 America/Bogota] send_brevo_email result: Success
+[10-Aug-2025 20:38:59 America/Bogota] --- END DEBUG ---
+[10-Aug-2025 20:38:59 America/Bogota] --- CASINO EMAIL DEBUG ---
+[10-Aug-2025 20:38:59 America/Bogota] Processing for chef: aavillamarin2@gmail.com at sede_id: 2
+[10-Aug-2025 20:38:59 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Quimbo
+    [total_desayunos] => 2
+    [total_almuerzos] => 3
+    [total_comidas] => 2
+    [total_ref1] => 2
+    [total_ref_cap] => 0
+)
+
+[10-Aug-2025 20:38:59 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentaci贸n</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentaci贸n</h1>
+        </div>
+        <div class="content">
+            <h2>Quimbo - 2025-08-11</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>2</span></li>
+                <li>Almuerzos <span>3</span></li>
+                <li>Comidas <span>2</span></li>
+                <li>Refrigerio Tipo 1 <span>2</span></li>
+                <li>Refrigerio Capacitaci贸n <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">脕rea | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">Ana Ibette Polania Herrera</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yolima Quintero</td><td style="border: 1px solid #ddd; padding: 8px;">Administraci贸n</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado autom谩ticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[10-Aug-2025 20:38:59 America/Bogota] send_brevo_email result: Success
+[10-Aug-2025 20:38:59 America/Bogota] --- END DEBUG ---

@@ -1,6 +1,6 @@
 <?php
 /**
- * Env铆a un correo usando la API de Brevo.
+ * Envía un correo usando la API de Brevo.
  */
 function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $pdo): bool {
     $apiKey = get_setting('brevo_api_key', $pdo);
@@ -10,6 +10,11 @@ function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $
     }
     // El email remitente debe estar verificado en tu cuenta de Brevo
     $sender = ['name' => APP_NAME, 'email' => 'noreply@qdos.network'];
+    
+    // Forzar la codificación a UTF-8 para evitar errores de JSON
+    $subject = mb_convert_encoding($subject, 'UTF-8', 'UTF-8');
+    $htmlContent = mb_convert_encoding($htmlContent, 'UTF-8', 'UTF-8');
+
     $data = ['sender' => $sender, 'to' => $to, 'subject' => $subject, 'htmlContent' => $htmlContent];
     
     $ch = curl_init();
@@ -29,7 +34,7 @@ function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $
 }
 
 /**
- * Obtiene un valor de la tabla de configuraci贸n.
+ * Obtiene un valor de la tabla de configuración.
  */
 function get_setting(string $key, PDO $pdo): string {
     $stmt = $pdo->prepare("SELECT valor FROM configuracion WHERE clave = ?");
@@ -47,7 +52,7 @@ function is_form_open(PDO $pdo): bool {
     return ($now >= new DateTime($apertura) && $now <= new DateTime($cierre));
 }
 /**
- * Envía datos a un Webhook de Google Apps Script.
+ * Env��a datos a un Webhook de Google Apps Script.
  */
 function sync_to_google_sheet(array $data, PDO $pdo) {
     $webhook_url = get_setting('google_sheets_webhook_url', $pdo);

@@ -858,18 +858,56 @@ if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] == 1) {
                 if (isset($chef_reports[$chef['id_sede']])) {
                     $report_data = $chef_reports[$chef['id_sede']][0];
                     
-                    $personas_stmt = $pdo->prepare("SELECT COALESCE(p.nombre_completo, dp.nombre_manual) as nombre FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? AND dp.id_sede = ?");
+                    $personas_stmt = $pdo->prepare(
+                        "SELECT 
+                            COALESCE(p.nombre_completo, dp.nombre_manual) as nombre_persona, 
+                            COALESCE(a.nombre_area, dp.area_wbe, 'N/A') as area
+                         FROM detalle_programacion dp
+                         JOIN programaciones pr ON dp.id_programacion = pr.id
+                         LEFT JOIN personas p ON dp.id_persona = p.id
+                         LEFT JOIN areas a ON p.id_area = a.id
+                         WHERE pr.fecha_programacion = ? AND dp.id_sede = ? 
+                         AND (dp.desayuno=1 OR dp.almuerzo=1 OR dp.comida=1 OR dp.refrigerio_tipo1=1 OR dp.refrigerio_capacitacion=1)
+                         ORDER BY nombre_persona"
+                    );
                     $personas_stmt->execute([$date, $chef['id_sede']]);
-                    $personas = $personas_stmt->fetchAll(PDO::FETCH_COLUMN);
-                    $personas_list = '<ul><li>' . implode('</li><li>', $personas) . '</li></ul>';
+                    $personas = $personas_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $personas_table = '<table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Área | WBE</th></tr></thead><tbody>';
+                    if (count($personas) > 0) {
+                        foreach ($personas as $persona) {
+                            $personas_table .= '<tr><td style="border: 1px solid #ddd; padding: 8px;">' . htmlspecialchars($persona['nombre_persona']) . '</td><td style="border: 1px solid #ddd; padding: 8px;">' . htmlspecialchars($persona['area']) . '</td></tr>';
+                        }
+                    } else {
+                        $personas_table .= '<tr><td colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No hay personal programado con servicios de alimentación.</td></tr>';
+                    }
+                    $personas_table .= '</tbody></table>';
 
                     $html_body = file_get_contents('../templates/email/reporte_casino.html');
                     $html_body = str_replace(
-                        ['{{sede_nombre}}', '{{fecha}}', '{{total_desayunos}}', '{{total_almuerzos}}', '{{total_comidas}}', '{{personas}}'],
-                        [$report_data['nombre_sede'], $date, $report_data['total_desayunos'], $report_data['total_almuerzos'], $report_data['total_comidas'], $personas_list],
+                        ['{{sede_nombre}}', '{{fecha}}', '{{total_desayunos}}', '{{total_almuerzos}}', '{{total_comidas}}', '{{total_ref1}}', '{{total_ref_cap}}', '{{personas}}'],
+                        [
+                            $report_data['nombre_sede'], 
+                            $date, 
+                            $report_data['total_desayunos'], 
+                            $report_data['total_almuerzos'], 
+                            $report_data['total_comidas'],
+                            $report_data['total_ref1'],
+                            $report_data['total_ref_cap'],
+                            $personas_table
+                        ],
                         $html_body
                     );
-                    send_brevo_email([['email' => $chef['email']]], "Reporte de Alimentación {$date}", $html_body, $pdo);
+                    // Logging for debugging
+                    error_log("--- CASINO EMAIL DEBUG ---");
+                    error_log("Processing for chef: " . $chef['email'] . " at sede_id: " . $chef['id_sede']);
+                    error_log("Report Data: " . print_r($report_data, true));
+                    error_log("Generated HTML Body: " . $html_body);
+                    
+                    $result = send_brevo_email([['email' => $chef['email']]], "Reporte de Alimentación {$date}", $html_body, $pdo);
+                    
+                    error_log("send_brevo_email result: " . ($result ? 'Success' : 'Failure'));
+                    error_log("--- END DEBUG ---");
                 }
             }
             if (!empty($transporter_report) && !empty($transporters)) {
