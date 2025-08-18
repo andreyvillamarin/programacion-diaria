@@ -3,7 +3,7 @@
 <div class="container-fluid">
     <div class="card">
         <div class="card-header">
-            <h3>Programaci®Æn de Casino</h3>
+            <h3>Programaci√≥n de Casino</h3>
             <div class="header-controls">
                 <div class="form-group">
                     <label for="casino-date-selector">Seleccione una fecha:</label>
@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="card-body" id="casino-dashboard-content">
-            <p class="loading-placeholder">Cargando datos de programaci®Æn...</p>
+            <p class="loading-placeholder">Cargando datos de programaci√≥n...</p>
         </div>
     </div>
 </div>

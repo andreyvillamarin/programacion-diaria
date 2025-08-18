@@ -666,4 +666,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
         loadTransporterData(transporterDateSelector.value);
     }
+
+    // --- LÓGICA PARA PÁGINA DE REPORTES ---
+    const downloadTransportBtn = document.getElementById('download-transport-pdf');
+    const downloadCasinoBetaniaBtn = document.getElementById('download-casino-betania-pdf');
+    const downloadCasinoQuimboBtn = document.getElementById('download-casino-quimbo-pdf');
+
+    if (downloadTransportBtn) {
+        downloadTransportBtn.addEventListener('click', () => {
+            const selectedDate = document.getElementById('transport-date').value;
+            if (selectedDate) {
+                window.open(`../api/handler.php?action=download_transporter_pdf&date=${selectedDate}`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha para el reporte de transporte.');
+            }
+        });
+    }
+
+    if (downloadCasinoBetaniaBtn) {
+        downloadCasinoBetaniaBtn.addEventListener('click', () => {
+            const selectedDate = document.getElementById('casino-betania-date').value;
+            if (selectedDate) {
+                // Asumiendo que el ID de la sede Betania es 1
+                window.open(`../api/handler.php?action=download_casino_pdf&date=${selectedDate}&sede_id=1`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha para el reporte de casino Betania.');
+            }
+        });
+    }
+
+    if (downloadCasinoQuimboBtn) {
+        downloadCasinoQuimboBtn.addEventListener('click', () => {
+            const selectedDate = document.getElementById('casino-quimbo-date').value;
+            if (selectedDate) {
+                // Asumiendo que el ID de la sede Quimbo es 2
+                window.open(`../api/handler.php?action=download_casino_pdf&date=${selectedDate}&sede_id=2`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha para el reporte de casino Quimbo.');
+            }
+        });
+    }
 });

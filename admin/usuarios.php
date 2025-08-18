@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit;
 }
 
-$page_title = "Gestión de Usuarios";
+$page_title = "Gestión de Administradores";
 include '../templates/header.php';
 
 // Obtener datos para la vista
@@ -37,7 +37,7 @@ $sedes = $pdo->query("SELECT * FROM sedes")->fetchAll();
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-header"><h3>Añadir Nuevo Usuario</h3></div>
+        <div class="card-header"><h3>Añadir Nuevo Administrador</h3></div>
         <div class="card-body">
             <form action="usuarios.php" method="POST" class="inline-form" id="add-user-form">
                 <input type="hidden" name="action" value="add_user">
@@ -60,13 +60,13 @@ $sedes = $pdo->query("SELECT * FROM sedes")->fetchAll();
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <button type="submit" class="btn">Añadir Usuario</button>
+                <button type="submit" class="btn">Añadir Administrador</button>
             </form>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header"><h3>Usuarios del Sistema</h3></div>
+        <div class="card-header"><h3>Administradores del Sistema</h3></div>
         <div class="card-body">
             <table class="data-table">
                 <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Sede Asignada</th><th>Estado</th><th>Acciones</th></tr></thead>
