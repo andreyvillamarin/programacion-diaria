@@ -391,3 +391,43 @@ textarea { min-height: 100px; resize: vertical; }
     font-size: 1em;
     margin: 0;
 }
+
+/* ================================================= */
+/* ===     ESTILOS PARA MEJORAR USABILIDAD       === */
+/* ================================================= */
+
+/* Hacer que las etiquetas de los checkboxes sean clicables y más grandes */
+.service-section label,
+.form-group label[for] {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el checkbox y el texto */
+    -webkit-user-select: none; /* Evita la selección de texto al hacer clic */
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Aumentar el tamaño del checkbox */
+input[type="checkbox"] {
+    width: 1.4em;
+    height: 1.4em;
+    accent-color: var(--primary-color);
+}
+
+/* Estilo para resaltar errores de validación condicional */
+.validation-error {
+    border: 2px solid var(--danger-color);
+    border-radius: 5px;
+    padding: 1rem;
+    background-color: #f8d7da;
+    transition: all 0.3s;
+}
+
+/* Aumentar el tamaño del radio button para que coincida */
+input[type="radio"] {
+    width: 1.4em;
+    height: 1.4em;
+    accent-color: var(--primary-color);
+}

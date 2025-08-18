@@ -340,6 +340,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         });
     }
+    
+    // --- LÓGICA PARA BUSCADOR EN DASHBOARD ADMIN ---
+    const dashboardSearchInput = document.getElementById('dashboard-search');
+    if (dashboardSearchInput) {
+        dashboardSearchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#dashboard-content .data-table tbody tr');
+            tableRows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                if (rowText.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // --- LÓGICA PARA PÁGINA DE REPORTES (reportes.php) ---
+    const transportPdfBtn = document.getElementById('download-transport-pdf');
+    if (transportPdfBtn) {
+        transportPdfBtn.addEventListener('click', () => {
+            const date = document.getElementById('transport-date').value;
+            if (date) {
+                window.open(`../api/handler.php?action=download_transporter_pdf&date=${date}`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha para el reporte de transporte.');
+            }
+        });
+    }
+
+    const casinoBetaniaPdfBtn = document.getElementById('download-casino-betania-pdf');
+    if (casinoBetaniaPdfBtn) {
+        casinoBetaniaPdfBtn.addEventListener('click', () => {
+            const date = document.getElementById('casino-betania-date').value;
+            if (date) {
+                // Asumiendo que el ID de la sede Betania es 1
+                window.open(`../api/handler.php?action=download_casino_pdf&date=${date}&sede_id=1`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha para el reporte de Betania.');
+            }
+        });
+    }
+
+    const casinoQuimboPdfBtn = document.getElementById('download-casino-quimbo-pdf');
+    if (casinoQuimboPdfBtn) {
+        casinoQuimboPdfBtn.addEventListener('click', () => {
+            const date = document.getElementById('casino-quimbo-date').value;
+            if (date) {
+                // Asumiendo que el ID de la sede Quimbo es 2
+                window.open(`../api/handler.php?action=download_casino_pdf&date=${date}&sede_id=2`, '_blank');
+            } else {
+                alert('Por favor, seleccione una fecha para el reporte de Quimbo.');
+            }
+        });
+    }
 
     // --- LÓGICA PARA CONFIRMACIÓN DE BORRADO ---
     document.addEventListener('click', function(event) {
@@ -489,16 +545,16 @@ document.addEventListener('DOMContentLoaded', () => {
         generateCharts();
     }
 
-    // --- LÓGICA PARA BUSCADOR EN TABLAS ---
+    // --- LÓGICA PARA BUSCADOR EN TABLAS (SECCIÓN PERSONAS) ---
     const personSearchInput = document.getElementById('person-search');
     if (personSearchInput) {
         personSearchInput.addEventListener('keyup', function() {
             const searchTerm = this.value.toLowerCase();
             const tableRows = document.querySelectorAll('#personas-table tbody tr');
             tableRows.forEach(row => {
-                const personName = row.cells[0].textContent.toLowerCase();
-                const areaName = row.cells[1].textContent.toLowerCase();
-                if (personName.includes(searchTerm) || areaName.includes(searchTerm)) {
+                // Se busca en el contenido de texto de toda la fila
+                const rowText = row.textContent.toLowerCase();
+                if (rowText.includes(searchTerm)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -665,45 +721,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         loadTransporterData(transporterDateSelector.value);
-    }
-
-    // --- LÓGICA PARA PÁGINA DE REPORTES ---
-    const downloadTransportBtn = document.getElementById('download-transport-pdf');
-    const downloadCasinoBetaniaBtn = document.getElementById('download-casino-betania-pdf');
-    const downloadCasinoQuimboBtn = document.getElementById('download-casino-quimbo-pdf');
-
-    if (downloadTransportBtn) {
-        downloadTransportBtn.addEventListener('click', () => {
-            const selectedDate = document.getElementById('transport-date').value;
-            if (selectedDate) {
-                window.open(`../api/handler.php?action=download_transporter_pdf&date=${selectedDate}`, '_blank');
-            } else {
-                alert('Por favor, seleccione una fecha para el reporte de transporte.');
-            }
-        });
-    }
-
-    if (downloadCasinoBetaniaBtn) {
-        downloadCasinoBetaniaBtn.addEventListener('click', () => {
-            const selectedDate = document.getElementById('casino-betania-date').value;
-            if (selectedDate) {
-                // Asumiendo que el ID de la sede Betania es 1
-                window.open(`../api/handler.php?action=download_casino_pdf&date=${selectedDate}&sede_id=1`, '_blank');
-            } else {
-                alert('Por favor, seleccione una fecha para el reporte de casino Betania.');
-            }
-        });
-    }
-
-    if (downloadCasinoQuimboBtn) {
-        downloadCasinoQuimboBtn.addEventListener('click', () => {
-            const selectedDate = document.getElementById('casino-quimbo-date').value;
-            if (selectedDate) {
-                // Asumiendo que el ID de la sede Quimbo es 2
-                window.open(`../api/handler.php?action=download_casino_pdf&date=${selectedDate}&sede_id=2`, '_blank');
-            } else {
-                alert('Por favor, seleccione una fecha para el reporte de casino Quimbo.');
-            }
-        });
     }
 });

@@ -70,7 +70,7 @@ include '../templates/header.php';
 
                 <div class="form-group">
                     <label for="zona">Zona</label>
-                    <input type="text" id="zona" name="zona" value="<?= htmlspecialchars($persona['zona']) ?>" required>
+                    <input type="text" id="zona" name="zona" value="<?= htmlspecialchars($persona['zona']) ?>">
                 </div>
 
                 <div class="form-group">

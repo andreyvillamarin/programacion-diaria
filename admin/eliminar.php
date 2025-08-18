@@ -50,11 +50,20 @@ switch ($tipo) {
 
 // 4. Ejecutar la consulta de eliminación
 try {
-    $sql = "DELETE FROM `$tabla` WHERE id = ?";
+    // Para las personas, se realiza un borrado lógico (soft delete)
+    if ($tipo === 'persona') {
+        $sql = "UPDATE personas SET activo = 0 WHERE id = ?";
+    } else {
+        // Para los demás tipos, se mantiene el borrado físico
+        $sql = "DELETE FROM `$tabla` WHERE id = ?";
+    }
+    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id]);
+
 } catch (PDOException $e) {
-    die("Error al eliminar el registro: " . $e->getMessage() . " <a href='$redirect_page'>Volver</a>");
+    // Si, a pesar de todo, ocurre un error, se muestra un mensaje genérico
+    die("Error al procesar la solicitud: " . $e->getMessage() . " <a href='$redirect_page'>Volver</a>");
 }
 
 // 5. Redirigir de vuelta

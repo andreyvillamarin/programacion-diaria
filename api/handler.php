@@ -394,7 +394,9 @@ if (isset($_SESSION['user_rol'])) {
                 $this->SetFont('Arial','B',15);
                 $this->SetFillColor(23, 32, 42);
                 $this->SetTextColor(255,255,255);
-                $this->Cell(0,15,utf8_decode("Reporte de Casino - Sede: {$this->nombre_sede} - {$this->date}"),0,1,'C',true);
+                $this->Cell(0,15,utf8_decode("Reporte de Casino - Sede: {$this->nombre_sede}"),0,1,'C',true);
+                $this->SetFont('Arial','',12);
+                $this->Cell(0,10, "Fecha: " . $this->date, 0, 1, 'C');
                 $this->Ln(5);
             }
 
@@ -443,7 +445,7 @@ if (isset($_SESSION['user_rol'])) {
                 $this->SetLineWidth(.3);
                 $this->SetFont('','B', 10);
 
-                $w = array(55, 35, 12, 12, 12, 12, 12, 40);
+                $w = array(70, 50, 12, 12, 12, 12, 12);
                 for($i=0;$i<count($header);$i++)
                     $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
                 $this->Ln();
@@ -458,7 +460,6 @@ if (isset($_SESSION['user_rol'])) {
                     $this->Cell($w[4], 6, $row['comida'] ? 'X' : '', 1, 0, 'C');
                     $this->Cell($w[5], 6, $row['refrigerio_tipo1'] ? 'X' : '', 1, 0, 'C');
                     $this->Cell($w[6], 6, $row['refrigerio_capacitacion'] ? 'X' : '', 1, 0, 'C');
-                    $this->Cell($w[7], 6, '', 1, 0, 'C');
                     $this->Ln();
                 }
             }
@@ -466,6 +467,7 @@ if (isset($_SESSION['user_rol'])) {
 
         try {
             $date = $_GET['date'];
+            // El admin puede especificar una sede en la URL, si no, se usa la del usuario en sesión
             $sede_id = $_GET['sede_id'] ?? $_SESSION['user_sede'] ?? 0;
 
             // Obtener el nombre de la sede
@@ -525,7 +527,7 @@ if (isset($_SESSION['user_rol'])) {
 
             // Tabla de Personal
             $pdf->TableTitle('Listado Detallado de Personal');
-            $header_personal = array('Nombre', utf8_decode('Área'), 'D', 'A', 'C', 'R1', 'RC', 'Nota');
+            $header_personal = array('Nombre', utf8_decode('Área'), 'D', 'A', 'C', 'R1', 'RC');
             $pdf->PersonalTable($header_personal, $personas);
             
             $pdf->Output('D', "reporte_casino_{$nombre_sede}_{$date}.pdf");

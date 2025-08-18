@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.value = tomorrow.toISOString().split('T')[0];
+    
+    // Formatear la fecha a YYYY-MM-DD manualmente para evitar problemas de zona horaria con toISOString()
+    const year = tomorrow.getFullYear();
+    const month = (tomorrow.getMonth() + 1).toString().padStart(2, '0'); // getMonth() es 0-indexed
+    const day = tomorrow.getDate().toString().padStart(2, '0');
+    
+    dateInput.value = `${year}-${month}-${day}`;
 
     fetch('api/data.php?action=get_initial_data')
         .then(res => res.json())
@@ -60,19 +66,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        let isValid = true;
-        form.querySelectorAll('input[required], select[required], textarea[required]').forEach(input => {
-            if (input.offsetWidth > 0 || input.offsetHeight > 0) {
-                if (!input.checkValidity()) {
-                    isValid = false;
-                    input.reportValidity();
+
+        // --- Lógica de Validación (en 2 Pasos) ---
+
+        // 1. Validación de campos requeridos estándar (Área, y campos de "Otras Áreas")
+        let firstInvalidField = null;
+        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        for (const field of requiredFields) {
+            if (field.offsetWidth > 0 || field.offsetHeight > 0) {
+                if (!field.checkValidity()) {
+                    firstInvalidField = field;
+                    break;
                 }
             }
-        });
+        }
+        if (firstInvalidField) {
+            firstInvalidField.reportValidity();
+            return;
+        }
 
-        if (!isValid) return;
+        // 2. Validación condicional para 'Sede de Destino' en cada tarjeta de persona
+        let conditionalError = null;
+        const personCards = document.querySelectorAll('#people-container .person-card');
+        for (const card of personCards) {
+            const foodCheckboxes = card.querySelectorAll('input[type="checkbox"]');
+            const transportSelect = card.querySelector('select');
+            const anyServiceSelected = Array.from(foodCheckboxes).some(cb => cb.checked) || (transportSelect && transportSelect.value !== '');
 
+            if (anyServiceSelected) {
+                const sedeRadios = card.querySelectorAll('input[type="radio"][name*="[id_sede]"]');
+                const sedeSelected = Array.from(sedeRadios).some(rb => rb.checked);
+                if (!sedeSelected) {
+                    const personName = card.querySelector('.person-name').textContent.trim();
+                    const sedeSection = sedeRadios[0].closest('.service-section');
+                    conditionalError = {
+                        message: `Por favor, seleccione una "Sede de Destino" para ${personName}, ya que ha seleccionado al menos un servicio.`,
+                        element: sedeSection
+                    };
+                    break;
+                }
+            }
+        }
+
+        if (conditionalError) {
+            alert(conditionalError.message);
+            conditionalError.element.classList.add('validation-error');
+            setTimeout(() => {
+                conditionalError.element.classList.remove('validation-error');
+            }, 3000);
+            return;
+        }
+
+        // --- Si la validación pasa, proceder con el envío ---
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 

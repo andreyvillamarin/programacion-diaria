@@ -13,13 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit;
 }
 
-$page_title = "Gestión de Usuarios";
+$page_title = "Gestión de Personas";
 include '../templates/header.php';
 
 // Obtener datos para la vista
 $personas = $pdo->query(
     "SELECT p.id, p.nombre_completo, p.activo, a.nombre_area, p.zona
-     FROM personas p JOIN areas a ON p.id_area = a.id 
+     FROM personas p JOIN areas a ON p.id_area = a.id
+     WHERE p.activo = 1
      ORDER BY p.nombre_completo"
 )->fetchAll();
 $areas_activas = $pdo->query("SELECT id, nombre_area FROM areas WHERE activa = 1 ORDER BY nombre_area")->fetchAll();
@@ -27,7 +28,7 @@ $areas_activas = $pdo->query("SELECT id, nombre_area FROM areas WHERE activa = 1
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-header"><h3>Añadir Nuevo Usuario</h3></div>
+        <div class="card-header"><h3>Añadir Nueva Persona</h3></div>
         <div class="card-body">
             <form action="personas.php" method="POST" class="inline-form">
                 <input type="hidden" name="action" value="add_person">
@@ -45,14 +46,14 @@ $areas_activas = $pdo->query("SELECT id, nombre_area FROM areas WHERE activa = 1
                 <div class="form-group">
                     <input type="text" name="zona" placeholder="Zona" required>
                 </div>
-                <button type="submit" class="btn">Añadir Usuario</button>
+                <button type="submit" class="btn">Añadir Persona</button>
             </form>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h3>Listado de Usuarios</h3>
+            <h3>Listado de Personal</h3>
             <div class="form-group">
                 <input type="text" id="person-search" placeholder="Buscar por nombre...">
             </div>

@@ -1,0 +1,117 @@
+[17-Aug-2025 22:20:40 America/Bogota] --- CASINO EMAIL DEBUG ---
+[17-Aug-2025 22:20:40 America/Bogota] Processing for chef: andreyvillamarin@gmail.com at sede_id: 1
+[17-Aug-2025 22:20:40 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Betania
+    [total_desayunos] => 26
+    [total_almuerzos] => 27
+    [total_comidas] => 2
+    [total_ref1] => 6
+    [total_ref_cap] => 0
+)
+
+[17-Aug-2025 22:20:40 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentación</h1>
+        </div>
+        <div class="content">
+            <h2>Betania - 2025-08-18</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>26</span></li>
+                <li>Almuerzos <span>27</span></li>
+                <li>Comidas <span>2</span></li>
+                <li>Refrigerio Tipo 1 <span>6</span></li>
+                <li>Refrigerio Capacitación <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Área | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">Alfonso Quintero Rodriguez</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Ana Ibette Polania Herrera</td><td style="border: 1px solid #ddd; padding: 8px;">Administración</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">ANDREY VILLAMARIN </td><td style="border: 1px solid #ddd; padding: 8px;">WBE 102393848577372</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Angie Paola Silva Dulcey</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Electrónico e Instrumentación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Astrid Helena Rincon Garcia</td><td style="border: 1px solid #ddd; padding: 8px;">HSEQ</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Camilo Andres Ramirez Cordoba</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Eléctrico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Carlos Alberto Tovar Arteaga</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Carlos Alberto Zuleta Meneses</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Diana Maria Gualteros</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Edison Torres Torrado</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Electrónico e Instrumentación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">FABIAN ARDILA</td><td style="border: 1px solid #ddd; padding: 8px;">NA</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Fernando Polo Bonilla</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Geovanni Roa Valderrama</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">German Galindo Valbuena</td><td style="border: 1px solid #ddd; padding: 8px;">Administración</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Hernan Ramirez Moreno</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Jader Geovany Quivano Villegas</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Eléctrico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">John Jairo Monje</td><td style="border: 1px solid #ddd; padding: 8px;">HSEQ</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Jose Fernando Bautista Martinez</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Juan Carlos Peña Paez</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Juan Manuel Chumbe</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Karol Yizeth Medina Trujillo</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Laura Garcia Echeverri</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Luis Andres Rivera Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Eléctrico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Luis Fernando Gaitan</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Luisa Fernanda Ruiz Contreras</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Nereida Niz Chavez</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Electrónico e Instrumentación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Paulo Andres Hernandez</td><td style="border: 1px solid #ddd; padding: 8px;">Administración</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Rodolfo Nelson Gaviria Tovar</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">William Quintero Burgos</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yaneth Hernández Montoya</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yolima Quintero</td><td style="border: 1px solid #ddd; padding: 8px;">Administración</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[17-Aug-2025 22:20:41 America/Bogota] send_brevo_email result: Success
+[17-Aug-2025 22:20:41 America/Bogota] --- END DEBUG ---
+[17-Aug-2025 22:20:41 America/Bogota] --- CASINO EMAIL DEBUG ---
+[17-Aug-2025 22:20:41 America/Bogota] Processing for chef: aavillamarin2@gmail.com at sede_id: 2
+[17-Aug-2025 22:20:41 America/Bogota] Report Data: Array
+(
+    [nombre_sede] => Quimbo
+    [total_desayunos] => 24
+    [total_almuerzos] => 25
+    [total_comidas] => 6
+    [total_ref1] => 3
+    [total_ref_cap] => 0
+)
+
+[17-Aug-2025 22:20:41 America/Bogota] Generated HTML Body: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Alimentación</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #005c9e; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content h2 { color: #005c9e; }
+        .summary { list-style: none; padding: 0; }
+        .summary li { background-color: #f9f9f9; border-left: 5px solid #02b3e4; margin-bottom: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .summary li span { font-weight: bold; font-size: 1.2em; }
+        .footer { background-color: #f4f4f4; color: #666; text-align: center; padding: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#x1F37D; Reporte de Alimentación</h1>
+        </div>
+        <div class="content">
+            <h2>Quimbo - 2025-08-18</h2>
+            <h3>Resumen de Cantidades</h3>
+            <ul class="summary">
+                <li>Desayunos <span>24</span></li>
+                <li>Almuerzos <span>25</span></li>
+                <li>Comidas <span>6</span></li>
+                <li>Refrigerio Tipo 1 <span>3</span></li>
+                <li>Refrigerio Capacitación <span>0</span></li>
+            </ul>
+            <h3>Listado de Personal</h3>
+            <p><table style="width:100%; border-collapse: collapse;"><thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th><th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Área | WBE</th></tr></thead><tbody><tr><td style="border: 1px solid #ddd; padding: 8px;">Alexander Romero Gonzalez</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Alexis Fierro</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Carlos Ivan Jiménez Quintero</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Eléctrico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Carolina Guarín</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Cesar Augusto Ojeda Yepes</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Christian Leonardo Motta Bonilla</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Damian Saenz</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Daniel Ducuara</td><td style="border: 1px solid #ddd; padding: 8px;">HSEQ</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Diana Olaya</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Elvis Samir Trujillo Mendez</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Humberto Caliman</td><td style="border: 1px solid #ddd; padding: 8px;">Gestión Inmobiliaria</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Jeisson Samir Martinez Mayorga</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Jhoser Quintana Pulido</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Electrónico e Instrumentación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Joaquin Emilio Gonzalez Plazas</td><td style="border: 1px solid #ddd; padding: 8px;">HSEQ</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Jonathan Guantiva</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Juan Ariza Barajas</td><td style="border: 1px solid #ddd; padding: 8px;">Obras Civiles</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Juan Diego Acero</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Juan José Peña</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Juan Manuel Ortiz Ardila</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Eléctrico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Karen Alexandra Sánchez Florez</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Eléctrico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Maria Paula Osorio Lozano</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Mecánico</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Mocca Villamarin Quintero</td><td style="border: 1px solid #ddd; padding: 8px;">wbe c013hdheyse</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Pablo Andres Ramirez Mayorga</td><td style="border: 1px solid #ddd; padding: 8px;">Obras Civiles</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Rider Andres Sanchez Caicedo</td><td style="border: 1px solid #ddd; padding: 8px;">PMs Ingeniería y Construcción</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Rodrigo Armando Hernandez Castaño</td><td style="border: 1px solid #ddd; padding: 8px;">Mantenimiento Electrónico e Instrumentación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">William Fonseca Idarraga</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yesid Fajardo Gordo</td><td style="border: 1px solid #ddd; padding: 8px;">Operación</td></tr><tr><td style="border: 1px solid #ddd; padding: 8px;">Yinna Paola Velasco</td><td style="border: 1px solid #ddd; padding: 8px;">Ambiental</td></tr></tbody></table></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo generado automáticamente. Por favor, no responder.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+[17-Aug-2025 22:20:41 America/Bogota] send_brevo_email result: Success
+[17-Aug-2025 22:20:41 America/Bogota] --- END DEBUG ---
+[17-Aug-2025 22:24:53 America/Bogota] Error en submit_form: La persona Yolima Quintero ya tiene una programación para el día 2025-08-18.
