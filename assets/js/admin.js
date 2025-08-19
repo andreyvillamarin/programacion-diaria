@@ -10,6 +10,7 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
         html += `
             <div class="person-card">
                 <h4 class="person-name">${person.nombre_completo}</h4>
+                <hr class="form-separator">
                 <div class="card-content">
                     <div class="service-section">
                         <h5><i class="fas fa-utensils"></i> Alimentación</h5>
@@ -19,6 +20,7 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
                         <label><input type="checkbox" name="people[${pId}][refrigerio_tipo1]" value="1"> Refrigerio Tipo 1</label>
                         <label><input type="checkbox" name="people[${pId}][refrigerio_capacitacion]" value="1"> Refrigerio Capacitación</label>
                     </div>
+                    <hr class="form-separator">
                     <div class="service-section">
                         <h5><i class="fas fa-bus"></i> Transporte</h5>
                         <label for="transport-${pId}">Tipo:</label>
@@ -27,6 +29,7 @@ function renderPeopleCards(people, sedes, transportOptions, container) {
                             ${transportOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
                     </div>
+                    <hr class="form-separator">
                     <div class="service-section">
                          <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino</h5>
                          ${sedes.map(sede => `
@@ -56,6 +59,7 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
             <label>Actividad a Realizar *</label>
             <textarea name="${namePrefix}[actividad]" required></textarea>
         </div>
+        <hr class="form-separator">
         <div class="person-card">
             <div class="card-content">
                 <div class="service-section">
@@ -66,6 +70,7 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
                     <label><input type="checkbox" name="${namePrefix}[refrigerio_tipo1]" value="1"> Refrigerio Tipo 1</label>
                     <label><input type="checkbox" name="${namePrefix}[refrigerio_capacitacion]" value="1"> Refrigerio Capacitación</label>
                 </div>
+                <hr class="form-separator">
                 <div class="service-section">
                     <h5><i class="fas fa-bus"></i> Transporte</h5>
                     <label>Tipo:</label>
@@ -74,6 +79,7 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
                         ${transportOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                     </select>
                 </div>
+                <hr class="form-separator">
                 <div class="service-section">
                      <h5><i class="fas fa-map-marker-alt"></i> Sede de Destino</h5>
                      ${sedes.map(sede => `

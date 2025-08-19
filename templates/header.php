@@ -29,8 +29,8 @@ if (!isset($_SESSION['user_id']) && basename($_SERVER['PHP_SELF']) != 'login.php
                 <?php if ($_SESSION['user_rol'] == 1): // Menú solo para Administradores ?>
                     <li class="nav-separator">Gestión</li>
                     <li><a href="<?= APP_URL ?>/admin/areas.php"><i class="fas fa-building"></i> Áreas</a></li>
-                    <li><a href="<?= APP_URL ?>/admin/personas.php"><i class="fas fa-users"></i> Personas</a></li>
-                    <li><a href="<?= APP_URL ?>/admin/usuarios.php"><i class="fas fa-user-shield"></i> Usuarios</a></li>
+                    <li><a href="<?= APP_URL ?>/admin/personas.php"><i class="fas fa-users"></i> Usuarios</a></li>
+                    <li><a href="<?= APP_URL ?>/admin/usuarios.php"><i class="fas fa-user-shield"></i> Administradores</a></li>
                     <li class="nav-separator">Sistema</li>
                     <li><a href="<?= APP_URL ?>/admin/analytics.php"><i class="fas fa-chart-bar"></i> Analíticas</a></li>
                     <li><a href="<?= APP_URL ?>/admin/reportes.php"><i class="fas fa-file-download"></i> Reportes</a></li>

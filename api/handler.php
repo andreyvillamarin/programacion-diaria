@@ -172,7 +172,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
             $this->SetLineWidth(.3);
             $this->SetFont('','B', 8);
 
-            $w = array(40, 40, 30, 30, 10, 10, 10, 10, 10, 40, 40);
+            $w = array(60, 60, 30, 30, 10, 10, 10, 10, 10, 40);
             for($i=0;$i<count($header);$i++)
                 $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
             $this->Ln();
@@ -216,14 +216,13 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
                     $row['comida'] ? 'X' : '',
                     $row['refrigerio_tipo1'] ? 'X' : '',
                     $row['refrigerio_capacitacion'] ? 'X' : '',
-                    utf8_decode($row['actividad']),
-                    utf8_decode($row['email_solicitante'])
+                    utf8_decode($row['actividad'])
                 );
 
                 $nb=0;
                 for($i=0;$i<count($data_row);$i++)
                     $nb = max($nb, $this->NbLines($w[$i], $data_row[$i]));
-                $h = 6 * $nb;
+                $h = 4 * $nb;
                 $this->CheckPageBreak($h);
 
                 for($i=0;$i<count($data_row);$i++)
@@ -231,13 +230,30 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
                     $x = $this->GetX();
                     $y = $this->GetY();
                     $this->Rect($x, $y, $w[$i], $h, 'D');
-                    $this->MultiCell($w[$i], 6, $data_row[$i], 0, 'C');
+                    $this->MultiCell($w[$i], 4, $data_row[$i], 0, 'C');
                     $this->SetXY($x + $w[$i], $y);
                 }
                 $this->Ln($h);
             }
             $this->Cell(array_sum($w),0,'','T');
             $this->Ln(10);
+        }
+
+        function SummaryTable($data)
+        {
+            $this->Ln(5);
+            $this->SetFont('Arial','B',12);
+            $this->Cell(0,10,utf8_decode('Resumen de Asistencia por Sede'),0,1,'C');
+            $this->Ln(2);
+
+            $this->SetFont('Arial','',10);
+            $this->SetFillColor(240, 240, 240);
+            $fill = true;
+            foreach($data as $sede => $count) {
+                $this->Cell(135, 8, utf8_decode("Total de usuarios para Sede {$sede}:"), 0, 0, 'R', $fill);
+                $this->Cell(135, 8, $count, 0, 1, 'L', $fill);
+                $fill = !$fill;
+            }
         }
 
         function CheckPageBreak($h)
@@ -299,7 +315,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
 
     try {
         $date = $_GET['date'];
-        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, p.zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo, dp.nombre_manual" );
+        $stmt = $pdo->prepare( "SELECT dp.*, p.nombre_completo, COALESCE(NULLIF(p.zona, ''), 'NA') as zona, s.nombre_sede, pr.email_solicitante, a.nombre_area FROM detalle_programacion dp LEFT JOIN personas p ON dp.id_persona = p.id LEFT JOIN areas a ON p.id_area = a.id JOIN sedes s ON dp.id_sede = s.id JOIN programaciones pr ON dp.id_programacion = pr.id WHERE pr.fecha_programacion = ? ORDER BY s.nombre_sede, zona, dp.transporte_tipo, p.nombre_completo, dp.nombre_manual" );
         $stmt->execute([$date]);
         $programacion = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -313,7 +329,7 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
         $pdf->AddPage();
         $pdf->SetFont('Arial','',10);
 
-        $header = array('Nombre', 'Area | WBE', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad | Nota', 'Solicitante');
+        $header = array('Nombre', 'Area | WBE', 'Transporte', 'Zona', 'D', 'A', 'C', 'R1', 'RC', 'Actividad | Nota');
 
         if (isset($programacion_por_sede['Betania'])) {
             $pdf->SedeTable($header, $programacion_por_sede['Betania'], 'Betania');
@@ -322,6 +338,14 @@ if ($action === 'download_pdf' && isset($_GET['date'])) {
         if (isset($programacion_por_sede['Quimbo'])) {
             $pdf->SedeTable($header, $programacion_por_sede['Quimbo'], 'Quimbo');
         }
+
+        $count_betania = isset($programacion_por_sede['Betania']) ? count($programacion_por_sede['Betania']) : 0;
+        $count_quimbo = isset($programacion_por_sede['Quimbo']) ? count($programacion_por_sede['Quimbo']) : 0;
+        $summary_data = [
+            'Betania' => $count_betania,
+            'Quimbo' => $count_quimbo
+        ];
+        $pdf->SummaryTable($summary_data);
 
         $pdf->Output('D', "programacion_$date.pdf");
         exit;
@@ -394,9 +418,7 @@ if (isset($_SESSION['user_rol'])) {
                 $this->SetFont('Arial','B',15);
                 $this->SetFillColor(23, 32, 42);
                 $this->SetTextColor(255,255,255);
-                $this->Cell(0,15,utf8_decode("Reporte de Casino - Sede: {$this->nombre_sede}"),0,1,'C',true);
-                $this->SetFont('Arial','',12);
-                $this->Cell(0,10, "Fecha: " . $this->date, 0, 1, 'C');
+                $this->Cell(0,15,utf8_decode("Reporte de Casino - Sede: {$this->nombre_sede} - Fecha: {$this->date}"),0,1,'C',true);
                 $this->Ln(5);
             }
 
@@ -443,23 +465,24 @@ if (isset($_SESSION['user_rol'])) {
                 $this->SetTextColor(255);
                 $this->SetDrawColor(128);
                 $this->SetLineWidth(.3);
-                $this->SetFont('','B', 10);
+                $this->SetFont('','B', 8);
 
-                $w = array(70, 50, 12, 12, 12, 12, 12);
+                $w = array(60, 40, 10, 10, 10, 10, 10, 30);
                 for($i=0;$i<count($header);$i++)
-                    $this->Cell($w[$i],7,$header[$i],1,0,'C',true);
+                    $this->Cell($w[$i],5,$header[$i],1,0,'C',true);
                 $this->Ln();
 
                 $this->SetTextColor(0);
-                $this->SetFont('','', 9);
+                $this->SetFont('','', 8);
                 foreach($data as $row){
-                    $this->Cell($w[0], 6, utf8_decode($row['nombre_persona']), 1);
-                    $this->Cell($w[1], 6, utf8_decode($row['area']), 1);
-                    $this->Cell($w[2], 6, $row['desayuno'] ? 'X' : '', 1, 0, 'C');
-                    $this->Cell($w[3], 6, $row['almuerzo'] ? 'X' : '', 1, 0, 'C');
-                    $this->Cell($w[4], 6, $row['comida'] ? 'X' : '', 1, 0, 'C');
-                    $this->Cell($w[5], 6, $row['refrigerio_tipo1'] ? 'X' : '', 1, 0, 'C');
-                    $this->Cell($w[6], 6, $row['refrigerio_capacitacion'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[0], 5, utf8_decode($row['nombre_persona']), 1);
+                    $this->Cell($w[1], 5, utf8_decode($row['area']), 1);
+                    $this->Cell($w[2], 5, $row['desayuno'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[3], 5, $row['almuerzo'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[4], 5, $row['comida'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[5], 5, $row['refrigerio_tipo1'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[6], 5, $row['refrigerio_capacitacion'] ? 'X' : '', 1, 0, 'C');
+                    $this->Cell($w[7], 5, '', 1, 0, 'C');
                     $this->Ln();
                 }
             }
@@ -512,6 +535,13 @@ if (isset($_SESSION['user_rol'])) {
             $pdf->AliasNbPages();
             $pdf->AddPage();
 
+            // Tabla de Personal (ahora primero)
+            $header_personal = array('Nombre', utf8_decode('Área'), 'D', 'A', 'C', 'R1', 'RC', 'Nota');
+            $pdf->PersonalTable($header_personal, $personas);
+            
+            // Nueva página para el resumen
+            $pdf->AddPage();
+
             // Tabla de Resumen
             $pdf->TableTitle('Resumen de Comidas');
             $header_resumen = array('Tipo de Comida', 'Cantidad');
@@ -523,12 +553,6 @@ if (isset($_SESSION['user_rol'])) {
                 'Refrigerio Capacitacion' => $resumen['total_ref_cap']
             ];
             $pdf->ResumenTable($header_resumen, $data_resumen);
-            $pdf->Ln(10);
-
-            // Tabla de Personal
-            $pdf->TableTitle('Listado Detallado de Personal');
-            $header_personal = array('Nombre', utf8_decode('Área'), 'D', 'A', 'C', 'R1', 'RC');
-            $pdf->PersonalTable($header_personal, $personas);
             
             $pdf->Output('D', "reporte_casino_{$nombre_sede}_{$date}.pdf");
             exit;
@@ -549,7 +573,7 @@ if (isset($_SESSION['user_rol'])) {
                  JOIN programaciones pr ON dp.id_programacion = pr.id
                  JOIN personas p ON dp.id_persona = p.id
                  JOIN sedes s ON dp.id_sede = s.id
-                 WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere'
+                 WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere' AND dp.transporte_tipo != 'Otro'
                  ORDER BY s.nombre_sede, p.nombre_completo"
             );
             $stmt->execute([$date]);
@@ -651,7 +675,7 @@ if (isset($_SESSION['user_rol'])) {
                  JOIN programaciones pr ON dp.id_programacion = pr.id
                  JOIN personas p ON dp.id_persona = p.id
                  JOIN sedes s ON dp.id_sede = s.id
-                 WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere'
+                 WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere' AND dp.transporte_tipo != 'Otro'
                  ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo"
             );
             $stmt->execute([$date]);

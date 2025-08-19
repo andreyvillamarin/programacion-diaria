@@ -416,6 +416,33 @@ input[type="checkbox"] {
     accent-color: var(--primary-color);
 }
 
+/* --- Estilos para separadores y espaciado de formularios --- */
+.form-separator {
+    border: none;
+    height: 1px;
+    background-color: var(--grey-dark);
+    margin: 1rem 0;
+}
+
+.service-section {
+    margin-bottom: 1rem;
+}
+
+.service-section:last-child {
+    margin-bottom: 0;
+}
+
+.service-section h5 {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.service-section > label {
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
 /* Estilo para resaltar errores de validación condicional */
 .validation-error {
     border: 2px solid var(--danger-color);
