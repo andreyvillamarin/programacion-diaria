@@ -1,8 +1,8 @@
 <?php
 /**
- * Env��a un correo usando la API de Brevo.
+ * Envia un correo usando la API de Brevo.
  */
-function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $pdo): bool {
+function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $pdo, array $attachments = []): bool {
     $apiKey = get_setting('brevo_api_key', $pdo);
     if (empty($apiKey)) {
         error_log('Error Brevo: API Key no configurada.');
@@ -10,13 +10,33 @@ function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $
     }
     // El email remitente debe estar verificado en tu cuenta de Brevo
     $sender = ['name' => APP_NAME, 'email' => 'noreply@qdos.network'];
-    
-    // Forzar la codificaci��n a UTF-8 para evitar errores de JSON
+
+    // Forzar la codificación a UTF-8 para evitar errores de JSON
     $subject = mb_convert_encoding($subject, 'UTF-8', 'UTF-8');
     $htmlContent = mb_convert_encoding($htmlContent, 'UTF-8', 'UTF-8');
 
-    $data = ['sender' => $sender, 'to' => $to, 'subject' => $subject, 'htmlContent' => $htmlContent];
-    
+    $data = [
+        'sender'      => $sender,
+        'to'          => $to,
+        'subject'     => $subject,
+        'htmlContent' => $htmlContent
+    ];
+
+    if (!empty($attachments)) {
+        $attachment_data = [];
+        foreach ($attachments as $filepath) {
+            if (file_exists($filepath)) {
+                $attachment_data[] = [
+                    'name'    => basename($filepath),
+                    'content' => base64_encode(file_get_contents($filepath))
+                ];
+            }
+        }
+        if (!empty($attachment_data)) {
+            $data['attachment'] = $attachment_data;
+        }
+    }
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://api.brevo.com/v3/smtp/email');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -26,9 +46,9 @@ function send_brevo_email(array $to, string $subject, string $htmlContent, PDO $
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
+
     if ($httpCode >= 200 && $httpCode < 300) return true;
-    
+
     error_log("Error de Brevo (HTTP $httpCode): " . $response);
     return false;
 }
