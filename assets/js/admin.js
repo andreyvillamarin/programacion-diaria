@@ -96,6 +96,39 @@ function renderServicesOnly(sedes, transportOptions, container, namePrefix = 'ot
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- LÓGICA PARA RESTRINGIR FECHAS PASADAS ---
+    const setMinDateToToday = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
+        const day = today.getDate().toString().padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+
+        const datePickerIds = [
+            'date-selector',
+            'modal-programming-date',
+            'casino-date-selector',
+            'transporter-date-selector',
+            'transport-date',
+            'casino-betania-date',
+            'casino-quimbo-date'
+        ];
+
+        datePickerIds.forEach(id => {
+            const datePicker = document.getElementById(id);
+            if (datePicker) {
+                datePicker.min = formattedDate;
+                // Si el valor actual es anterior a hoy, ajústalo a hoy
+                if (datePicker.value < formattedDate) {
+                    datePicker.value = formattedDate;
+                }
+            }
+        });
+    };
+
+    setMinDateToToday();
+
+
     // --- LÓGICA PARA EL DASHBOARD PRINCIPAL DEL ADMIN ---
     const dateSelector = document.getElementById('date-selector');
     if (dateSelector) {

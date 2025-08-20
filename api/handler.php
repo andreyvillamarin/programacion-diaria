@@ -1,8 +1,19 @@
 <?php
-header('Content-Type: application/json');
 require_once '../includes/init.php'; // Carga config, funciones y sesión
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
+
+// Acciones que fuerzan la descarga de un archivo y no deben devolver JSON.
+$file_download_actions = [
+    'download_pdf',
+    'download_casino_pdf',
+    'download_transporter_pdf',
+    'download_analytics_pdf'
+];
+
+if (!in_array($action, $file_download_actions)) {
+    header('Content-Type: application/json');
+}
 $response = ['success' => false, 'message' => 'Acción no reconocida.'];
 
 //======================================================================

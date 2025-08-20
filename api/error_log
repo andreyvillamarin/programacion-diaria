@@ -115,3 +115,24 @@
 [17-Aug-2025 22:20:41 America/Bogota] send_brevo_email result: Success
 [17-Aug-2025 22:20:41 America/Bogota] --- END DEBUG ---
 [17-Aug-2025 22:24:53 America/Bogota] Error en submit_form: La persona Yolima Quintero ya tiene una programación para el día 2025-08-18.
+[19-Aug-2025 14:12:41 America/Bogota] PHP Fatal error:  Cannot declare class PDF_Casino, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 138
+[19-Aug-2025 14:21:20 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1212
+[19-Aug-2025 14:21:20 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1221
+[19-Aug-2025 14:21:20 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1223
+[19-Aug-2025 16:19:30 America/Bogota] Error en submit_form: La persona Alexander Romero Gonzalez ya tiene una programación para el día 2025-08-20.
+[19-Aug-2025 16:23:25 America/Bogota] PHP Fatal error:  Cannot declare class PDF, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 419
+[19-Aug-2025 16:23:27 America/Bogota] PHP Fatal error:  Cannot declare class PDF, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 419
+[19-Aug-2025 16:23:30 America/Bogota] PHP Fatal error:  Cannot declare class PDF, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 419
+[19-Aug-2025 16:23:46 America/Bogota] PHP Fatal error:  Cannot declare class PDF, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 419
+[19-Aug-2025 16:26:03 America/Bogota] PHP Fatal error:  Cannot declare class PDF, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 419
+[19-Aug-2025 16:26:54 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1212
+[19-Aug-2025 16:26:54 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1221
+[19-Aug-2025 16:26:54 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1223
+[19-Aug-2025 16:27:56 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1212
+[19-Aug-2025 16:27:56 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1221
+[19-Aug-2025 16:27:56 America/Bogota] PHP Warning:  Undefined variable $date in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 1223
+[19-Aug-2025 16:27:59 America/Bogota] PHP Fatal error:  Cannot declare class PDF, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 419
+[19-Aug-2025 16:30:30 America/Bogota] PHP Fatal error:  Cannot declare class PDF_Transporter, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 872
+[19-Aug-2025 16:33:41 America/Bogota] PHP Fatal error:  Cannot declare class PDF_Transporter, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 872
+[19-Aug-2025 16:33:46 America/Bogota] PHP Fatal error:  Cannot declare class PDF_Casino, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 691
+[19-Aug-2025 16:33:48 America/Bogota] PHP Fatal error:  Cannot declare class PDF_Casino, because the name is already in use in /home/qdosnetw/public_html/demos/enel/api/handler.php on line 691
