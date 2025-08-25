@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <?php $recaptcha_site_key = get_setting('recaptcha_v3_site_key', $pdo); ?>
     <script src="https://www.google.com/recaptcha/api.js?render=<?= htmlspecialchars($recaptcha_site_key) ?>"></script>
 </head>
@@ -55,9 +56,20 @@
                         <label for="requester-email">Tu Correo Electrónico</label>
                         <input type="email" id="requester-email" name="email_solicitante" placeholder="tu.correo@ejemplo.com">
                     </div>
-                     <div class="form-group">
-                        <label for="programming-date">Fecha de Programación</label>
-                        <input type="date" id="programming-date" name="fecha_programacion">
+                    <div class="form-group hidden" id="schedule-type-group">
+                        <label>Programar para *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="schedule_type" value="single" checked> Un día</label>
+                            <label><input type="radio" name="schedule_type" value="multiple"> Varios días</label>
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="single-date-group">
+                        <label for="programming-date">Fecha de Programación *</label>
+                        <input type="date" id="programming-date" name="fecha_programacion" required>
+                    </div>
+                    <div class="form-group hidden" id="multiple-dates-group">
+                        <label for="multiple-dates">Fechas de Programación *</label>
+                        <input type="text" id="multiple-dates" name="fechas_programacion" placeholder="Seleccione una o más fechas">
                     </div>
                 </fieldset>
 
@@ -88,6 +100,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="assets/js/main.js"></script>
 </body>
