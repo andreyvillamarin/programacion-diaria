@@ -21,19 +21,17 @@ $response = ['success' => false, 'message' => 'Acción no reconocida.'];
 //======================================================================
 if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = filter_input(INPUT_POST, 'email_solicitante', FILTER_VALIDATE_EMAIL);
-    $fecha = $_POST['fecha_programacion'];
     $area_id = $_POST['area'];
 
-    // $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM programaciones WHERE fecha_programacion = ? AND estado = 'finalizada'");
-    // $check_stmt->execute([$fecha]);
-    // if ($check_stmt->fetchColumn() > 0) {
-    //     $response = ['success' => false, 'message' => 'La programación para esta fecha ya ha sido finalizada y no se pueden añadir más registros.'];
-    //     echo json_encode($response);
-    //     exit;
-    // }
+    $dates = [];
+    if (!empty($_POST['fechas_programacion'])) {
+        $dates = explode(', ', $_POST['fechas_programacion']);
+    } elseif (!empty($_POST['fecha_programacion'])) {
+        $dates[] = $_POST['fecha_programacion'];
+    }
 
-    if (!$fecha || !$area_id) {
-        $response['message'] = 'Faltan datos del solicitante. Por favor complete el formulario.';
+    if (empty($dates) || !$area_id) {
+        $response['message'] = 'Faltan datos cruciales (fecha o área). Por favor complete el formulario.';
         echo json_encode($response);
         exit;
     }
@@ -42,60 +40,75 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $area_stmt->execute([$area_id]);
     $area_nombre = $area_stmt->fetchColumn();
 
+    $successfully_programmed_dates = [];
+    $errors = [];
+
     try {
-        $pdo->beginTransaction();
-        $stmt_prog = $pdo->prepare("INSERT INTO programaciones (fecha_programacion, email_solicitante) VALUES (?, ?)");
-        $stmt_prog->execute([$fecha, $email]);
-        $prog_id = $pdo->lastInsertId();
+        foreach ($dates as $fecha) {
+            $fecha = trim($fecha);
+            if (empty($fecha)) continue;
 
-        if (trim(mb_strtolower($area_nombre, 'UTF-8')) == 'otras áreas') {
-            $details = $_POST['other'];
-            if (empty($details['nombre_manual']) || empty($details['area_wbe']) || empty($details['actividad'])) {
-                 throw new Exception("Faltan datos en el formulario de Otras Áreas.");
-            }
-            $stmt_detail = $pdo->prepare("INSERT INTO detalle_programacion (id_programacion, id_persona, id_sede, desayuno, almuerzo, comida, refrigerio_tipo1, refrigerio_capacitacion, transporte_tipo, nombre_manual, area_wbe, actividad) VALUES (:prog_id, NULL, :sede_id, :desayuno, :almuerzo, :comida, :ref1, :ref_cap, :transporte, :nombre, :area, :actividad)");
-            $stmt_detail->execute([':prog_id' => $prog_id, ':sede_id' => $details['id_sede'] ?? null, ':desayuno' => isset($details['desayuno']) ? 1 : 0, ':almuerzo' => isset($details['almuerzo']) ? 1 : 0, ':comida' => isset($details['comida']) ? 1 : 0, ':ref1' => isset($details['refrigerio_tipo1']) ? 1 : 0, ':ref_cap' => isset($details['refrigerio_capacitacion']) ? 1 : 0, ':transporte' => $details['transporte_tipo'] ?? 'No requiere', ':nombre' => $details['nombre_manual'], ':area' => $details['area_wbe'], ':actividad' => $details['actividad']]);
-            $sede_name_stmt = $pdo->prepare("SELECT nombre_sede FROM sedes WHERE id = ?"); $sede_name_stmt->execute([$details['id_sede']]); $sede_name = $sede_name_stmt->fetchColumn();
-            $sheet_data = [ $fecha, $email, $details['nombre_manual'], $details['area_wbe'], $sede_name, $details['transporte_tipo'] ?? 'No requiere', isset($details['desayuno']) ? 'SI' : 'NO', isset($details['almuerzo']) ? 'SI' : 'NO', isset($details['comida']) ? 'SI' : 'NO', isset($details['refrigerio_tipo1']) ? 'SI' : 'NO', isset($details['refrigerio_capacitacion']) ? 'SI' : 'NO', $details['actividad'] ];
-            sync_to_google_sheet($sheet_data, $pdo);
+            try {
+                $pdo->beginTransaction();
+                $stmt_prog = $pdo->prepare("INSERT INTO programaciones (fecha_programacion, email_solicitante) VALUES (?, ?)");
+                $stmt_prog->execute([$fecha, $email]);
+                $prog_id = $pdo->lastInsertId();
 
-        } else {
-            $people_data = $_POST['people'] ?? [];
-            if (empty($people_data)) { throw new Exception("No se seleccionó ninguna persona para programar."); }
-            $stmt_detail = $pdo->prepare("INSERT INTO detalle_programacion (id_programacion, id_persona, id_sede, desayuno, almuerzo, comida, refrigerio_tipo1, refrigerio_capacitacion, transporte_tipo) VALUES (:prog_id, :persona_id, :sede_id, :desayuno, :almuerzo, :comida, :ref1, :ref_cap, :transporte)");
-            foreach ($people_data as $person_id => $details) {
-                $has_food = !empty($details['desayuno']) || !empty($details['almuerzo']) || !empty($details['comida']) || !empty($details['refrigerio_tipo1']) || !empty($details['refrigerio_capacitacion']);
-                $has_transport = !empty($details['transporte_tipo']) && $details['transporte_tipo'] !== 'No requiere';
-
-                if ($has_food || $has_transport) {
-                    if ($has_transport && empty($details['id_sede'])) {
-                        $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
-                        $person_name_stmt->execute([$person_id]);
-                        $person_name = $person_name_stmt->fetchColumn();
-                        throw new Exception("Se debe seleccionar una sede de destino para {$person_name} ya que se ha seleccionado un tipo de transporte.");
+                if (trim(mb_strtolower($area_nombre, 'UTF-8')) == 'otras áreas') {
+                    $details = $_POST['other'];
+                    if (empty($details['nombre_manual']) || empty($details['area_wbe']) || empty($details['actividad'])) {
+                         throw new Exception("Faltan datos en el formulario de Otras Áreas.");
                     }
-
-                    // Verificar si la persona ya tiene una programación para ese día
-                    $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM detalle_programacion dp JOIN programaciones p ON dp.id_programacion = p.id WHERE dp.id_persona = ? AND p.fecha_programacion = ?");
-                    $check_stmt->execute([$person_id, $fecha]);
-                    if ($check_stmt->fetchColumn() > 0) {
-                        $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
-                        $person_name_stmt->execute([$person_id]);
-                        $person_name = $person_name_stmt->fetchColumn();
-                        throw new Exception("La persona {$person_name} ya tiene una programación para el día {$fecha}.");
-                    }
-
-                    $stmt_detail->execute([':prog_id' => $prog_id, ':persona_id' => $person_id, ':sede_id' => $details['id_sede'], ':desayuno' => isset($details['desayuno']) ? 1 : 0, ':almuerzo' => isset($details['almuerzo']) ? 1 : 0, ':comida' => isset($details['comida']) ? 1 : 0, ':ref1' => isset($details['refrigerio_tipo1']) ? 1 : 0, ':ref_cap' => isset($details['refrigerio_capacitacion']) ? 1 : 0, ':transporte' => $details['transporte_tipo'] ?? 'No requiere']);
-                    $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?"); $person_name_stmt->execute([$person_id]); $person_name = $person_name_stmt->fetchColumn();
+                    $stmt_detail = $pdo->prepare("INSERT INTO detalle_programacion (id_programacion, id_persona, id_sede, desayuno, almuerzo, comida, refrigerio_tipo1, refrigerio_capacitacion, transporte_tipo, nombre_manual, area_wbe, actividad) VALUES (:prog_id, NULL, :sede_id, :desayuno, :almuerzo, :comida, :ref1, :ref_cap, :transporte, :nombre, :area, :actividad)");
+                    $stmt_detail->execute([':prog_id' => $prog_id, ':sede_id' => $details['id_sede'] ?? null, ':desayuno' => isset($details['desayuno']) ? 1 : 0, ':almuerzo' => isset($details['almuerzo']) ? 1 : 0, ':comida' => isset($details['comida']) ? 1 : 0, ':ref1' => isset($details['refrigerio_tipo1']) ? 1 : 0, ':ref_cap' => isset($details['refrigerio_capacitacion']) ? 1 : 0, ':transporte' => $details['transporte_tipo'] ?? 'No requiere', ':nombre' => $details['nombre_manual'], ':area' => $details['area_wbe'], ':actividad' => $details['actividad']]);
                     $sede_name_stmt = $pdo->prepare("SELECT nombre_sede FROM sedes WHERE id = ?"); $sede_name_stmt->execute([$details['id_sede']]); $sede_name = $sede_name_stmt->fetchColumn();
-                    $sheet_data = [ $fecha, $email, $person_name, $area_nombre, $sede_name, $details['transporte_tipo'] ?? 'No requiere', isset($details['desayuno']) ? 'SI' : 'NO', isset($details['almuerzo']) ? 'SI' : 'NO', isset($details['comida']) ? 'SI' : 'NO', isset($details['refrigerio_tipo1']) ? 'SI' : 'NO', isset($details['refrigerio_capacitacion']) ? 'SI' : 'NO', '' ];
+                    $sheet_data = [ $fecha, $email, $details['nombre_manual'], $details['area_wbe'], $sede_name, $details['transporte_tipo'] ?? 'No requiere', isset($details['desayuno']) ? 'SI' : 'NO', isset($details['almuerzo']) ? 'SI' : 'NO', isset($details['comida']) ? 'SI' : 'NO', isset($details['refrigerio_tipo1']) ? 'SI' : 'NO', isset($details['refrigerio_capacitacion']) ? 'SI' : 'NO', $details['actividad'] ];
                     sync_to_google_sheet($sheet_data, $pdo);
+
+                } else {
+                    $people_data = $_POST['people'] ?? [];
+                    if (empty($people_data)) { throw new Exception("No se seleccionó ninguna persona para programar."); }
+                    $stmt_detail = $pdo->prepare("INSERT INTO detalle_programacion (id_programacion, id_persona, id_sede, desayuno, almuerzo, comida, refrigerio_tipo1, refrigerio_capacitacion, transporte_tipo) VALUES (:prog_id, :persona_id, :sede_id, :desayuno, :almuerzo, :comida, :ref1, :ref_cap, :transporte)");
+                    foreach ($people_data as $person_id => $details) {
+                        $has_food = !empty($details['desayuno']) || !empty($details['almuerzo']) || !empty($details['comida']) || !empty($details['refrigerio_tipo1']) || !empty($details['refrigerio_capacitacion']);
+                        $has_transport = !empty($details['transporte_tipo']) && $details['transporte_tipo'] !== 'No requiere';
+
+                        if ($has_food || $has_transport) {
+                            if (empty($details['id_sede'])) {
+                                $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
+                                $person_name_stmt->execute([$person_id]);
+                                $person_name = $person_name_stmt->fetchColumn();
+                                throw new Exception("Para {$person_name}, se debe seleccionar una sede de destino si se solicita algún servicio.");
+                            }
+
+                            // Verificar si la persona ya tiene una programación para ese día
+                            $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM detalle_programacion dp JOIN programaciones p ON dp.id_programacion = p.id WHERE dp.id_persona = ? AND p.fecha_programacion = ?");
+                            $check_stmt->execute([$person_id, $fecha]);
+                            if ($check_stmt->fetchColumn() > 0) {
+                                $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?");
+                                $person_name_stmt->execute([$person_id]);
+                                $person_name = $person_name_stmt->fetchColumn();
+                                throw new Exception("{$person_name} ya tiene una programación para el día {$fecha}.");
+                            }
+
+                            $stmt_detail->execute([':prog_id' => $prog_id, ':persona_id' => $person_id, ':sede_id' => $details['id_sede'], ':desayuno' => isset($details['desayuno']) ? 1 : 0, ':almuerzo' => isset($details['almuerzo']) ? 1 : 0, ':comida' => isset($details['comida']) ? 1 : 0, ':ref1' => isset($details['refrigerio_tipo1']) ? 1 : 0, ':ref_cap' => isset($details['refrigerio_capacitacion']) ? 1 : 0, ':transporte' => $details['transporte_tipo'] ?? 'No requiere']);
+                            $person_name_stmt = $pdo->prepare("SELECT nombre_completo FROM personas WHERE id = ?"); $person_name_stmt->execute([$person_id]); $person_name = $person_name_stmt->fetchColumn();
+                            $sede_name_stmt = $pdo->prepare("SELECT nombre_sede FROM sedes WHERE id = ?"); $sede_name_stmt->execute([$details['id_sede']]); $sede_name = $sede_name_stmt->fetchColumn();
+                            $sheet_data = [ $fecha, $email, $person_name, $area_nombre, $sede_name, $details['transporte_tipo'] ?? 'No requiere', isset($details['desayuno']) ? 'SI' : 'NO', isset($details['almuerzo']) ? 'SI' : 'NO', isset($details['comida']) ? 'SI' : 'NO', isset($details['refrigerio_tipo1']) ? 'SI' : 'NO', isset($details['refrigerio_capacitacion']) ? 'SI' : 'NO', '' ];
+                            sync_to_google_sheet($sheet_data, $pdo);
+                        }
+                    }
                 }
+                $pdo->commit();
+                $successfully_programmed_dates[] = $fecha;
+
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $errors[] = "Error en la fecha {$fecha}: " . $e->getMessage();
             }
         }
-        $pdo->commit();
 
-        if ($email) {
+        if (!empty($successfully_programmed_dates) && $email) {
             $programacion_cards = '';
             if (trim(mb_strtolower($area_nombre, 'UTF-8')) == 'otras áreas') {
                 $details = $_POST['other'];
@@ -131,16 +144,23 @@ if ($action === 'submit_form' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
+            $fechas_str = implode(', ', $successfully_programmed_dates);
             $html_body = file_get_contents('../templates/email/confirmacion_usuario.html');
-            $html_body = str_replace(['{{fecha}}', '{{programacion_cards}}'], [$fecha, $programacion_cards], $html_body);
+            $html_body = str_replace(['{{fecha}}', '{{programacion_cards}}'], [$fechas_str, $programacion_cards], $html_body);
             send_brevo_email([['email' => $email]], 'Confirmación de Programación', $html_body, $pdo);
         }
 
-        $response = ['success' => true, 'message' => '¡Programación enviada con éxito!'];
+        if (empty($errors)) {
+            $response = ['success' => true, 'message' => '¡Programación enviada con éxito para todas las fechas!'];
+        } else {
+            $error_message = "Programación completada con errores: <br>- Fechas exitosas: " . implode(', ', $successfully_programmed_dates) . "<br>- Errores: " . implode('<br>', $errors);
+            $response = ['success' => false, 'message' => $error_message];
+        }
+
     } catch (Exception $e) {
-        $pdo->rollBack();
-        error_log("Error en submit_form: " . $e->getMessage());
-        $response = ['success' => false, 'message' => 'Error interno: ' . $e->getMessage()];
+        // Catching potential errors outside the loop, though less likely now
+        error_log("Error fatal en submit_form: " . $e->getMessage());
+        $response = ['success' => false, 'message' => 'Error fatal: ' . $e->getMessage()];
     }
 }
 

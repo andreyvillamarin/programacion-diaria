@@ -8,8 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const peopleContainer = document.getElementById('people-container');
     const otherAreaServicesContainer = document.getElementById('other-area-services');
     const dateInput = document.getElementById('programming-date');
+    const multiDateInput = document.getElementById('multiple-dates');
     const submitBtn = document.getElementById('submit-btn');
     const formMessages = document.getElementById('form-messages');
+    const dateTypeRadios = document.querySelectorAll('input[name="date_type"]');
+    const singleDateContainer = document.getElementById('single-date-container');
+    const multiDateContainer = document.getElementById('multiple-dates-container');
 
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -22,6 +26,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     dateInput.min = tomorrowString;
     dateInput.value = tomorrowString;
+    dateInput.required = true;
+    multiDateInput.required = false;
+
+    // Initialize Flatpickr for multi-date selection
+    const flatpickrInstance = flatpickr(multiDateInput, {
+        mode: "multiple",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        locale: "es",
+        conjunction: ", ",
+    });
+
+    // Handle date type change
+    dateTypeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const isSingle = radio.value === 'single';
+            singleDateContainer.classList.toggle('hidden', !isSingle);
+            multiDateContainer.classList.toggle('hidden', isSingle);
+            dateInput.required = isSingle;
+            multiDateInput.required = !isSingle;
+        });
+    });
 
     fetch('api/data.php?action=get_initial_data')
         .then(res => res.json())
@@ -125,6 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData(form);
         formData.append('action', 'submit_form');
+
+        // Eliminar el campo de fecha que no se está usando para evitar enviar datos innecesarios
+        const selectedDateType = document.querySelector('input[name="date_type"]:checked').value;
+        if (selectedDateType === 'single') {
+            formData.delete('fechas_programacion');
+        } else {
+            formData.delete('fecha_programacion');
+        }
+
 
         fetch('api/handler.php', { method: 'POST', body: formData })
             .then(res => res.json())

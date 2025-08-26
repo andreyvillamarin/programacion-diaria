@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Programación de Servicios - <?= APP_NAME ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,9 +56,23 @@
                         <label for="requester-email">Tu Correo Electrónico</label>
                         <input type="email" id="requester-email" name="email_solicitante" placeholder="tu.correo@ejemplo.com">
                     </div>
-                     <div class="form-group">
+
+                    <div class="form-group">
+                        <label>Tipo de Programación *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="date_type" value="single" checked> Un día</label>
+                            <label><input type="radio" name="date_type" value="multiple"> Varios días</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="single-date-container">
                         <label for="programming-date">Fecha de Programación</label>
                         <input type="date" id="programming-date" name="fecha_programacion">
+                    </div>
+
+                    <div class="form-group hidden" id="multiple-dates-container">
+                        <label for="multiple-dates">Fechas de Programación</label>
+                        <input type="text" id="multiple-dates" name="fechas_programacion" placeholder="Seleccione una o más fechas">
                     </div>
                 </fieldset>
 
@@ -89,6 +104,8 @@
 </div>
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>
