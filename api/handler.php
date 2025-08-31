@@ -707,7 +707,7 @@ if (isset($_SESSION['user_rol'])) {
                  JOIN personas p ON dp.id_persona = p.id
                  JOIN sedes s ON dp.id_sede = s.id
                  WHERE pr.fecha_programacion = ? AND dp.transporte_tipo != 'No requiere' AND dp.transporte_tipo != 'Otro'
-                 ORDER BY s.nombre_sede, p.zona, dp.transporte_tipo, p.nombre_completo"
+                 ORDER BY s.nombre_sede, CASE WHEN p.zona IS NULL OR p.zona = '' OR p.zona = 'NA' THEN 1 ELSE 0 END, p.zona, dp.transporte_tipo, p.nombre_completo"
             );
             $stmt->execute([$date]);
             $reporte = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -720,16 +720,18 @@ if (isset($_SESSION['user_rol'])) {
             $pdf = new PDF_Transporter('P', 'mm', 'A4');
             $pdf->date = $date;
             $pdf->AliasNbPages();
-            $pdf->AddPage();
             
             $header = array('Nombre', 'Tipo de Ruta', 'Zona');
 
-            if (isset($reporte_por_sede['Betania'])) {
-                $pdf->SedeTable($header, $reporte_por_sede['Betania'], 'Betania');
-            }
-            
-            if (isset($reporte_por_sede['Quimbo'])) {
-                $pdf->SedeTable($header, $reporte_por_sede['Quimbo'], 'Quimbo');
+            $isFirstSede = true;
+            foreach ($reporte_por_sede as $sede_nombre => $sede_data) {
+                if (!$isFirstSede) {
+                    $pdf->AddPage();
+                } else {
+                    $pdf->AddPage();
+                    $isFirstSede = false;
+                }
+                $pdf->SedeTable($header, $sede_data, $sede_nombre);
             }
 
             $pdf->Output('D', "rutas_transporte_$date.pdf");

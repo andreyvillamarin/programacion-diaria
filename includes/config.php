@@ -1,13 +1,13 @@
 <?php
 // -- BASE DE DATOS -- //
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'qdosnetw_enel');
-define('DB_USER', 'qdosnetw_webmaster');
-define('DB_PASS', 'tRVy8pvXVAz8');
+define('DB_HOST', 'yolimaquintero.com');
+define('DB_NAME', 'yolita_progd');
+define('DB_USER', 'yolita_webmaster');
+define('DB_PASS', 'qReGs44C8pR7');
 define('DB_CHARSET', 'utf8mb4');
 
 // -- APLICACIÓN -- //
-define('APP_URL', 'https://qdos.network/demos/enel');
+define('APP_URL', 'https://yolimaquintero.com');
 define('APP_NAME', 'Programación Enel');
 date_default_timezone_set('America/Bogota');
 
